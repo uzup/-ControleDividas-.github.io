@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestor Financeiro Cloud 7.5</title>
+    <title>Gestor Financeiro Cloud 7.6</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -131,12 +131,16 @@
         .client-header:hover { background-color: #f9fafb; }
         .header-info h2 { margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; }
         
-        /* Novos estilos para os Badges do Card Minimizado */
-        .parcel-badges { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .parcel-badges { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
         .p-badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; border: 1px solid transparent; }
         .pb-total { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
         .pb-paid { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
         .pb-pend { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+        .tag { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .tag-success { background: #dcfce7; color: #166534; }
+        .tag-danger { background: #fee2e2; color: #991b1b; }
+        .tag-warning { background: #fef3c7; color: #92400e; }
 
         .header-actions { display: flex; align-items: center; gap: 15px; }
         .chevron { transition: transform 0.3s; font-size: 0.8rem; color: var(--text-sec); }
@@ -170,11 +174,6 @@
         .btn-whatsapp.disabled { color: #ccc; cursor: not-allowed; }
         .btn-trash { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; padding: 5px; }
         .btn-trash:hover { color: var(--danger); }
-        
-        .tag { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-        .tag-success { background: #dcfce7; color: #166534; }
-        .tag-danger { background: #fee2e2; color: #991b1b; }
-        .tag-warning { background: #fef3c7; color: #92400e; }
         
         .btn-add-more { width: 100%; background: #f0fdf4; color: #166534; border: none; border-top: 1px solid #bbf7d0; padding: 12px; font-weight: 600; cursor: pointer; }
         
@@ -418,7 +417,7 @@
     let tempGroups = [];
     let editingCobradorId = null;
     let calCurrentDate = new Date(); 
-    let agendaDateFilter = null; // Filtro de data da agenda
+    let agendaDateFilter = null;
 
     auth.onAuthStateChanged((user) => {
         if (user) {
@@ -490,7 +489,6 @@
         return new Date(d.getTime() + d.getTimezoneOffset() * 60000).toLocaleDateString('pt-BR');
     }
 
-    // --- COBRADORES & TAXAS EXTRAS ---
     function updateFeeList() {
         const fees = [...new Set(clients.map(c => c.feeName).filter(Boolean))];
         document.getElementById('feeList').innerHTML = fees.map(f => `<option value="${f}">`).join('');
@@ -550,7 +548,7 @@
 
     function deleteCobrador(e, fid) {
         e.stopPropagation();
-        if(clients.some(c => c.cobradorId === fid) && !confirm("Existem clientes com este cobrador! Eles ficarão 'Sem Cobrador'. Continuar?")) return;
+        if(clients.some(c => c.cobradorId === fid) && !confirm("Existem devedores vinculados a este cobrador! Eles ficarão 'Sem Cobrador'. Continuar?")) return;
         if(!clients.some(c => c.cobradorId === fid) && !confirm("Excluir cobrador?")) return;
         db.ref('users/' + currentUser.uid + '/cobradores/' + fid).remove();
     }
@@ -727,7 +725,6 @@
             const cobData = cobradores.find(cb => cb.firebaseId === c.cobradorId); const cobNomeDisplay = cobData ? cobData.name : 'Sem Cobrador (Padrão)';
             const feeNameDisplay = c.feeName || 'Honorários';
             
-            // CONTAGEM DE PARCELAS PARA O MODO MINIMIZADO
             const totalParcels = c.installments.length;
             const paidParcels = c.installments.filter(p => p.paid).length;
             const pendingParcels = totalParcels - paidParcels;
@@ -741,6 +738,7 @@
                             <span class="p-badge pb-total">Total: ${totalParcels}</span>
                             <span class="p-badge pb-paid">Pagas: ${paidParcels}</span>
                             <span class="p-badge pb-pend">Pendentes: ${pendingParcels}</span>
+                            <span style="font-size:0.85rem; margin-left:10px; color:var(--text-sec); display:flex; align-items:center;">${sl}</span>
                         </div>
                     </div>
                     <div class="header-actions"><span class="chevron">▼</span><button class="btn-trash" onclick="deleteClient(event, '${c.firebaseId}')">🗑</button></div>
@@ -774,7 +772,7 @@
 
     function changeCalMonth(offset) {
         calCurrentDate.setMonth(calCurrentDate.getMonth() + offset);
-        agendaDateFilter = null; // Reseta o filtro ao mudar de mês
+        agendaDateFilter = null;
         renderAgenda();
     }
 
@@ -830,7 +828,6 @@
         
         targetClients.forEach(client => client.installments.forEach(inst => { 
             if (!inst.paid) {
-                // Aplica o filtro de data selecionada no calendário
                 if(!agendaDateFilter || inst.dueDate === agendaDateFilter) {
                     flatList.push({ ...inst, clientName: client.name, clientPhone: client.phone, firebaseId: client.firebaseId }); 
                 }
@@ -838,11 +835,7 @@
         }));
 
         const clearBtn = document.getElementById('clearAgendaFilterBtn');
-        if (agendaDateFilter) {
-            clearBtn.classList.add('active');
-        } else {
-            clearBtn.classList.remove('active');
-        }
+        if (agendaDateFilter) clearBtn.classList.add('active'); else clearBtn.classList.remove('active');
 
         if (flatList.length === 0) { container.innerHTML = '<div style="text-align:center; padding:50px; color:#666;">🎉 Nenhuma cobrança pendente para esta seleção!</div>'; return; }
         
@@ -937,7 +930,7 @@
         buildAndSendZap(phone, name, parcels, msgType, firebaseId);
     }
 
-    // --- MENSAGEM WHATSAPP ---
+    // --- NOVA FUNÇÃO DE MENSAGEM PADRÃO ---
     function buildAndSendZap(phone, name, parcelData, msgType, firebaseId) {
         if (!phone) return alert("Sem telefone.");
         const cleanPhone = phone.replace(/\D/g, ''); 
@@ -1001,3 +994,9 @@
 </script>
 </body>
 </html>
+
+------------------------------
+1- Tem alguns cobradores com o mesmo nome na hora de criar a dívida porque eu criei duas vezes para testar e não apaguei um deles. Quero saber se tem um jeito de descobrir qual é qual para na hora de cadastrar o cliente o cobrador selecionado seja o que os outros clientes estão cadastrados. 
+2- e se eu apagar aquele cobrador os dados dos outros clientes que estavam vinculados a ele vai ficar tudo sem cobrador né? entao de certa forma eu vou acabar perdendo a organização ali pra esses clientes. como eu faço nesse caso? se eu editar um cobrador já existente e só mudar o nome dele (para nao ter nomes repetidos), vai alterar em todos os clientes já cadastrados que ele for o cobrador ne? e isso resolve o problema dos clientes ficarem "sem cobrador"?
+
+A resposta não tem que ter nenhum código modificado. Apenas tire essa duvida para mim

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestor Financeiro Cloud 5.1</title>
+    <title>Gestor Financeiro Cloud 5.2</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -441,17 +441,11 @@
         }
     }
 
-    // --- NOVA FUNÇÃO: RENUMERAR PARCELAS (Auto-correção) ---
     function renumberInstallments(client) {
-        // Ordena por data
         client.installments.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
-        // Renumera 1, 2, 3...
-        client.installments.forEach((inst, index) => {
-            inst.number = index + 1;
-        });
+        client.installments.forEach((inst, index) => { inst.number = index + 1; });
     }
 
-    // --- EDIÇÃO DE CLIENTE ---
     function editClientName(firebaseId) {
         const c = clients.find(x => x.firebaseId === firebaseId);
         if(c) {
@@ -470,9 +464,7 @@
 
     function deleteClient(e, id) { 
         e.stopPropagation(); 
-        if(confirm("Excluir cliente?")) { 
-             db.ref('users/' + currentUser.uid + '/clients/' + id).remove();
-        } 
+        if(confirm("Excluir cliente?")) db.ref('users/' + currentUser.uid + '/clients/' + id).remove();
     }
     
     function toggleFee(firebaseId, idx) { 
@@ -500,18 +492,15 @@
         if(v){p.value=parseFloat(v.replace(',','.')); c.totalDebt=c.installments.reduce((a,b)=>a+b.value,0); updateCloud(c); } 
     }
 
-    // --- NOVA FUNÇÃO: EDITAR DATA DA PARCELA ---
     function editInstallmentDate(firebaseId, iid) {
         const c = clients.find(x => x.firebaseId === firebaseId);
         const p = c.installments.find(x => x.id === iid);
         const novaData = prompt("Nova Data (AAAA-MM-DD):", p.dueDate);
         if(novaData && novaData.match(/^\d{4}-\d{2}-\d{2}$/)) {
             p.dueDate = novaData;
-            renumberInstallments(c); // Reordena e renumera automaticamente
+            renumberInstallments(c);
             updateCloud(c);
-        } else if (novaData) {
-            alert("Formato inválido. Use AAAA-MM-DD (ex: 2024-05-20)");
-        }
+        } else if (novaData) alert("Formato inválido. Use AAAA-MM-DD (ex: 2024-05-20)");
     }
     
     function editNote(firebaseId, iid) { 
@@ -525,7 +514,7 @@
         const c = clients.find(x => x.firebaseId === firebaseId);
         if (confirm("Excluir parcela?")) { 
             c.installments = c.installments.filter(p => p.id !== iid); 
-            renumberInstallments(c); // Reordena e renumera automaticamente
+            renumberInstallments(c);
             c.totalDebt = c.installments.reduce((acc, curr) => acc + curr.value, 0); 
             updateCloud(c); 
         }
@@ -549,23 +538,35 @@
             client.installments.push({ id: Date.now() + Math.random(), number: nextNumber++, value: val, dueDate: `${y}-${m}-${d}`, paid: false, note: "" }); monthOffset++;
         }
         
-        renumberInstallments(client); // Garante ordem
+        renumberInstallments(client);
         client.totalDebt = client.installments.reduce((acc, curr) => acc + curr.value, 0); 
         updateCloud(client);
     }
 
     function checkStatus(ds) { const t=new Date(); t.setHours(0,0,0,0); const [y,m,d]=ds.split('-'); return new Date(y,m-1,d)<t?'atrasado':'pendente'; }
 
+    // --- WHATSAPP CLIQUE INDIVIDUAL (DESMARCAR) ---
+    function handleZapClick(phone, name, parcelNum, value, dateString, msgType, firebaseId, parcelId, isContacted) {
+        if(isContacted) {
+            if(confirm("Esta parcela já foi marcada como contactada (✅).\n\nDeseja DESMARCAR o visto?\n(OK = Desmarcar / Cancelar = Manter e Reenviar)")) {
+                const c = clients.find(x => x.firebaseId === firebaseId);
+                if(c) {
+                    const p = c.installments.find(x => x.id === parcelId);
+                    if(p) { p.contacted = false; updateCloud(c); }
+                }
+                return;
+            }
+        }
+        openWhatsAppCustom(phone, name, parcelNum, value, dateString, msgType, firebaseId, parcelId);
+    }
+
     // --- RENDERIZAÇÃO ---
     function renderClients() {
         const l=document.getElementById('clientsList'), term=document.getElementById('searchBar').value.toLowerCase(); l.innerHTML='';
-        
         const fil=clients.filter(c=>c.name.toLowerCase().includes(term));
         
-        // ORDENAÇÃO ALFABÉTICA (NOVA)
         fil.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
 
-        // DATA DE HOJE PARA URGENCIA
         const today = new Date(); today.setHours(0,0,0,0);
         const todayString = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
@@ -576,14 +577,12 @@
             const st=pct>=99.9?'pago':(od?'atrasado':'pendente');
             const sl=st==='pago'?'<span class="tag tag-success">Pago</span>':(st==='atrasado'?'<span class="tag tag-danger">Atrasado</span>':'<span class="tag tag-warning">Em dia</span>');
             
-            // VERIFICA SE TEM PARCELA VENCENDO HOJE
             const isUrgent = c.installments.some(p => !p.paid && p.dueDate === todayString);
             const urgencyIcon = isUrgent ? '<span class="urgent-icon" title="Vence Hoje">❗</span>' : '';
 
-            // Usamos c.firebaseId para as funções de update
             l.innerHTML+=`
             <div class="card client-card status-${st} ${c.isExpanded?'is-open':''}">
-                <div class="client-header" onclick="toggleCard('${c.firebaseId}')"><div class="header-info"><h2>${c.name}</h2> ${urgencyIcon} <span>${c.installments.length} parcelas • ${sl}</span></div><div class="header-actions"><span class="chevron">▼</span><button class="btn-trash" onclick="deleteClient(event, '${c.firebaseId}')">🗑</button></div></div>
+                <div class="client-header" onclick="toggleCard('${c.firebaseId}')"><div class="header-info"><h2>${c.name} ${urgencyIcon}</h2> <span>${c.installments.length} parcelas • ${sl}</span></div><div class="header-actions"><span class="chevron">▼</span><button class="btn-trash" onclick="deleteClient(event, '${c.firebaseId}')">🗑</button></div></div>
                 <div class="client-body">
                     <div class="client-edit-area">
                         <div class="edit-row">
@@ -602,9 +601,10 @@
                         ${c.installments.map(p=>{
                             const ist=checkStatus(p.dueDate), tag=p.paid?'<span class="tag tag-success">OK</span>':(ist==='atrasado'?'<span class="tag tag-danger">Vencido</span>':'<span class="tag tag-warning">Aberto</span>');
                             const nc=p.note?'has-note':'';
-                            const zapIcon = p.contacted ? '✅' : '📱'; // Ícone muda se já foi contactado
+                            const zapIcon = p.contacted ? '✅' : '📱';
+                            const contactedBool = p.contacted ? 'true' : 'false';
                             
-                            return `<div class="installment-row" style="${p.paid?'opacity:0.6':''}"><div class="chk-group"><input type="checkbox" class="custom-checkbox" ${p.paid?'checked':''} onchange="toggleInstallment('${c.firebaseId}',${p.id})"><div><div style="font-weight:600;">Parc. ${p.number}</div><div class="inst-date">${formatDate(p.dueDate)}</div></div></div><div style="display:flex;align-items:center;">${!p.paid?`<button class="btn-whatsapp ${c.phone?'':'disabled'}" onclick="openWhatsAppCustom('${c.phone}','${c.name}',${p.number},${p.value},'${p.dueDate}', 'auto', '${c.firebaseId}', ${p.id})">${zapIcon}</button>`:''}<div style="text-align:right;margin-left:10px;"><div class="val-group"><span class="inst-val">${formatMoney(p.value)}</span><button class="action-btn" onclick="editInstallmentDate('${c.firebaseId}',${p.id})">📅</button><button class="action-btn btn-note ${nc}" onclick="editNote('${c.firebaseId}',${p.id})">📝</button><button class="action-btn" onclick="editInstallmentValue('${c.firebaseId}',${p.id})">✎</button><button class="action-btn btn-del-parcel" onclick="deleteInstallment('${c.firebaseId}',${p.id})">✕</button></div><div>${tag}</div></div></div></div>`;
+                            return `<div class="installment-row" style="${p.paid?'opacity:0.6':''}"><div class="chk-group"><input type="checkbox" class="custom-checkbox" ${p.paid?'checked':''} onchange="toggleInstallment('${c.firebaseId}',${p.id})"><div><div style="font-weight:600;">Parc. ${p.number}</div><div class="inst-date">${formatDate(p.dueDate)}</div></div></div><div style="display:flex;align-items:center;">${!p.paid?`<button class="btn-whatsapp ${c.phone?'':'disabled'}" onclick="handleZapClick('${c.phone}','${c.name}',${p.number},${p.value},'${p.dueDate}', 'auto', '${c.firebaseId}', ${p.id}, ${contactedBool})">${zapIcon}</button>`:''}<div style="text-align:right;margin-left:10px;"><div class="val-group"><span class="inst-val">${formatMoney(p.value)}</span><button class="action-btn" onclick="editInstallmentDate('${c.firebaseId}',${p.id})">📅</button><button class="action-btn btn-note ${nc}" onclick="editNote('${c.firebaseId}',${p.id})">📝</button><button class="action-btn" onclick="editInstallmentValue('${c.firebaseId}',${p.id})">✎</button><button class="action-btn btn-del-parcel" onclick="deleteInstallment('${c.firebaseId}',${p.id})">✕</button></div><div>${tag}</div></div></div></div>`;
                         }).join('')}
                         <button class="btn-add-more" onclick="addMoreParcels('${c.firebaseId}')">+ Adicionar Parcelas</button>
                     </div>
@@ -634,16 +634,16 @@
             items.forEach(item => {
                 const zapClass = item.clientPhone ? '' : 'disabled';
                 const zapIcon = item.contacted ? '✅' : '📱';
-                html += `<div class="agenda-item"><div><div class="ag-client-name">${item.clientName}</div><div class="ag-parcel-info">Parcela ${item.number} • ${formatMoney(item.value)}</div></div><div class="ag-actions"><button class="btn-whatsapp ${zapClass}" onclick="openWhatsAppCustom('${item.clientPhone}', '${item.clientName}', ${item.number}, ${item.value}, '${item.dueDate}', 'auto', '${item.firebaseId}', ${item.id})">${zapIcon}</button></div></div>`;
+                const contactedBool = item.contacted ? 'true' : 'false';
+                html += `<div class="agenda-item"><div><div class="ag-client-name">${item.clientName}</div><div class="ag-parcel-info">Parcela ${item.number} • ${formatMoney(item.value)}</div></div><div class="ag-actions"><button class="btn-whatsapp ${zapClass}" onclick="handleZapClick('${item.clientPhone}', '${item.clientName}', ${item.number}, ${item.value}, '${item.dueDate}', 'auto', '${item.firebaseId}', ${item.id}, ${contactedBool})">${zapIcon}</button></div></div>`;
             });
             html += `</div></div>`;
             container.innerHTML += html;
         });
     }
 
-    // --- EXPORTAR E IMPORTAR (Mantidos) ---
+    // --- EXPORTAR E IMPORTAR ---
     function exportData() { 
-        // Remove IDs do firebase para backup limpo
         const cleanData = clients.map(c => { const { firebaseId, ...rest } = c; return rest; });
         const blob = new Blob([JSON.stringify(cleanData,null,2)], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); 
     }
@@ -663,27 +663,46 @@
             }; 
             r.readAsText(f); 
         } 
-        input.value = ''; // Reset
+        input.value = ''; 
     }
 
-    // --- NOTIFICAÇÕES (Lógica original + dados nuvem) ---
+    // --- NOTIFICAÇÕES AGRUPADAS (NOVO MOTOR) ---
     function getDailyNotifications() {
         const today = new Date(); today.setHours(0,0,0,0);
         const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-        let listTomorrow = [], listToday = [], listOverdue = [];
+        
+        let mapTomorrow = {}, mapToday = {}, mapOverdue = {};
         
         clients.forEach(client => {
             client.installments.forEach(inst => {
                 if(!inst.paid) {
                     const [y, m, d] = inst.dueDate.split('-'); const dued = new Date(y, m-1, d); dued.setHours(0,0,0,0);
                     const item = { clientName: client.name, phone: client.phone, number: inst.number, value: inst.value, dueDate: inst.dueDate, contacted: inst.contacted, firebaseId: client.firebaseId, id: inst.id };
-                    if(dued.getTime() === tomorrow.getTime()) listTomorrow.push(item);
-                    else if(dued.getTime() === today.getTime()) listToday.push(item);
-                    else if(dued < today) listOverdue.push(item);
+                    
+                    let targetMap = null;
+                    if(dued.getTime() === tomorrow.getTime()) targetMap = mapTomorrow;
+                    else if(dued.getTime() === today.getTime()) targetMap = mapToday;
+                    else if(dued < today) targetMap = mapOverdue;
+
+                    if(targetMap) {
+                        if(!targetMap[client.firebaseId]) {
+                            targetMap[client.firebaseId] = { clientName: client.name, phone: client.phone, firebaseId: client.firebaseId, parcels: [], totalValue: 0 };
+                        }
+                        targetMap[client.firebaseId].parcels.push(item);
+                        targetMap[client.firebaseId].totalValue += inst.value;
+                    }
                 }
             });
         });
-        listOverdue.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+        const toArray = (map) => Object.values(map);
+        let listTomorrow = toArray(mapTomorrow);
+        let listToday = toArray(mapToday);
+        let listOverdue = toArray(mapOverdue);
+
+        const getEarliest = (parcels) => Math.min(...parcels.map(p => new Date(p.dueDate).getTime()));
+        listOverdue.sort((a,b) => getEarliest(a.parcels) - getEarliest(b.parcels));
+
         return { listTomorrow, listToday, listOverdue };
     }
 
@@ -709,29 +728,99 @@
     function renderNotifItem(item, type) {
         let msgType = ''; if(type === 'past') msgType = 'late'; if(type === 'today') msgType = 'today'; if(type === 'future') msgType = 'tomorrow';
         const zapClass = item.phone ? '' : 'disabled';
-        const zapIcon = item.contacted ? '✅' : '📢';
-        const dateDisplay = type === 'past' ? `<span style="color:var(--danger); font-size:0.75rem;">Venceu: ${formatDate(item.dueDate)}</span>` : '';
-        return `<div class="notif-item"><div class="notif-info"><div>${item.clientName}</div><div>Parc. ${item.number} • ${formatMoney(item.value)}</div>${dateDisplay}</div><button class="btn-whatsapp ${zapClass}" onclick="openWhatsAppCustom('${item.phone}', '${item.clientName}', ${item.number}, ${item.value}, '${item.dueDate}', '${msgType}', '${item.firebaseId}', ${item.id})">${zapIcon}</button></div>`;
+        
+        const isMultiple = item.parcels.length > 1;
+        const parcelNumbers = item.parcels.map(p => p.number).join(', ');
+        const parcelDesc = isMultiple ? `${item.parcels.length} parcelas (Nº ${parcelNumbers})` : `Parc. ${parcelNumbers}`;
+        
+        const allContacted = item.parcels.every(p => p.contacted);
+        const zapIcon = allContacted ? '✅' : '📢';
+        const contactedBool = allContacted ? 'true' : 'false';
+        
+        let dateDisplay = '';
+        if(type === 'past') dateDisplay = `<span style="color:var(--danger); font-size:0.75rem;">Vencimento original: ${formatDate(item.parcels[0].dueDate)}</span>`;
+        
+        const parcelsJson = encodeURIComponent(JSON.stringify(item.parcels));
+
+        return `<div class="notif-item">
+            <div class="notif-info">
+                <div>${item.clientName}</div>
+                <div>${parcelDesc} • ${formatMoney(item.totalValue)}</div>
+                ${dateDisplay}
+            </div>
+            <button class="btn-whatsapp ${zapClass}" onclick="handleZapClickGrouped('${item.phone}', '${item.clientName}', '${parcelsJson}', ${item.totalValue}, '${msgType}', '${item.firebaseId}', ${contactedBool})">${zapIcon}</button>
+        </div>`;
     }
 
     function closeNotificationModal() { document.getElementById('notifModal').classList.remove('active'); }
 
-    // --- WHATSAPP ATUALIZADO COM PIX E MODELO PEDIDO ---
+    // --- WHATSAPP AGRUPADO (MODAL NOTIFICAÇÕES) ---
+    function handleZapClickGrouped(phone, name, parcelsJsonStr, totalValue, msgType, firebaseId, isContacted) {
+        const parcels = JSON.parse(decodeURIComponent(parcelsJsonStr));
+        if(isContacted) {
+            if(confirm("Estas parcelas já foram marcadas como contactadas (✅).\n\nDeseja DESMARCAR todas?\n(OK = Desmarcar / Cancelar = Manter e Reenviar)")) {
+                const c = clients.find(x => x.firebaseId === firebaseId);
+                if(c) {
+                    parcels.forEach(pGroup => {
+                        const p = c.installments.find(x => x.id === pGroup.id);
+                        if(p) p.contacted = false;
+                    });
+                    updateCloud(c);
+                }
+                return;
+            }
+        }
+        openWhatsAppGrouped(phone, name, parcels, totalValue, msgType, firebaseId);
+    }
+
+    function openWhatsAppGrouped(phone, name, parcels, totalValue, msgType, firebaseId) {
+        if (!phone) { alert("Sem telefone."); return; }
+        const cleanPhone = phone.replace(/\D/g, ''); 
+        
+        const pixInfo = "\n\nO pagamento será realizado via PIX,\nutilizando a chave abaixo:\n\nChave PIX: 17.466.646.0002-42\n\nTitular: ASSOCIAÇÃO EDUCACIONAL MODOTTE\n(FARON – VILHENA)";
+
+        let intro = "";
+        let parcelLines = parcels.map(p => `[Parcela ${p.number}]: vencimento em ${formatDate(p.dueDate)} - ${formatMoney(p.value)}`).join("\n");
+
+        if (msgType === 'today') {
+           intro = `Olá ${name}!\n\nConforme nosso acordo, hoje é a data do pagamento das parcelas referentes ao valor total de ${formatMoney(totalValue)}.`;
+        } else if (msgType === 'late') {
+           intro = `Olá ${name}!\n\nConforme nosso acordo, verificamos que a data do pagamento de algumas parcelas já passou. O valor total em aberto é de ${formatMoney(totalValue)}.`;
+        } else if (msgType === 'tomorrow') {
+           intro = `Olá ${name}!\n\nConforme nosso acordo, o vencimento das seguintes parcelas é amanhã. Total: ${formatMoney(totalValue)}.`;
+        } else {
+           intro = `Olá ${name}!\n\nConforme nosso acordo, segue lembrete de pagamento.`;
+        }
+
+        const msg = intro + "\n\n" + parcelLines + pixInfo;
+        
+        if(firebaseId) {
+            const c = clients.find(x => x.firebaseId === firebaseId);
+            if(c) {
+                parcels.forEach(pGroup => {
+                    const p = c.installments.find(x => x.id === pGroup.id);
+                    if(p) p.contacted = true;
+                });
+                updateCloud(c);
+            }
+        }
+        window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // --- WHATSAPP INDIVIDUAL ---
     function openWhatsAppCustom(phone, name, parcelNum, value, dateString, msgType, firebaseId, parcelId) {
         if (!phone) { alert("Sem telefone."); return; }
         const cleanPhone = phone.replace(/\D/g, ''); 
         const formattedDate = formatDate(dateString); 
         
-        // Determina tipo se for "auto"
         if(msgType === 'auto') {
             const today = new Date(); today.setHours(0,0,0,0);
             const d = new Date(dateString + 'T00:00:00');
             if(d.getTime() === today.getTime()) msgType = 'today';
             else if(d < today) msgType = 'late';
-            else msgType = 'tomorrow'; // ou future
+            else msgType = 'tomorrow'; 
         }
 
-        // Rodapé do PIX (fixo)
         const pixInfo = "\n\nO pagamento será realizado via PIX,\nutilizando a chave abaixo:\n\nChave PIX: 17.466.646.0002-42\n\nTitular: ASSOCIAÇÃO EDUCACIONAL MODOTTE\n(FARON – VILHENA)";
 
         let intro = "";
@@ -749,7 +838,6 @@
 
         const msg = intro + "\n\n" + parcelLine + pixInfo;
         
-        // MARCAR COMO CONTACTADO
         if(firebaseId && parcelId) {
             const c = clients.find(x => x.firebaseId === firebaseId);
             if(c) {

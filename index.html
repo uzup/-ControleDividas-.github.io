@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestor Financeiro Cloud 7.1</title>
+    <title>Gestor Financeiro Cloud 7.2</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -22,6 +22,7 @@
             --warning: #f59e0b;
             --whatsapp: #25D366;
             --border: #e5e7eb;
+            --note-active: #d97706;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -59,13 +60,16 @@
         #app-container {
             display: none;
             padding: 20px;
-            padding-top: 80px;
+            padding-top: 20px;
             max-width: 900px; margin: 0 auto;
         }
 
-        .nav-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .nav-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
         .nav-btn { flex: 1; min-width: 110px; padding: 15px 5px; border: none; background: #e5e7eb; color: var(--text-sec); font-size: 0.9rem; font-weight: 700; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
         .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
+
+        .global-filter-container { margin-bottom: 20px; }
+        .global-filter-container select { width: 100%; padding: 15px; font-weight: bold; border-radius: 12px; border: 1px solid var(--primary); color: var(--primary); background: white; cursor: pointer; }
 
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 15px; }
         .search-box { flex-grow: 1; position: relative; }
@@ -74,6 +78,7 @@
         
         .actions-box { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .btn-sys { border: 1px solid var(--border); background: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-sec); display: flex; align-items: center; gap: 5px; height: 40px; }
+        .btn-sys:hover { background: #f9fafb; color: var(--primary); border-color: var(--primary); }
         .btn-logout { background: #fee2e2; color: #991b1b; border: none; height: 40px; padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.85rem; }
         .user-email { font-size: 0.8rem; color: var(--text-sec); margin-right: 5px; display: none; }
 
@@ -194,6 +199,17 @@
         .home-list { max-height: 400px; overflow-y: auto; }
         .home-list-item { padding: 15px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
 
+        /* --- CALENDAR STYLES --- */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 20px; }
+        .cal-day-header { text-align: center; font-weight: bold; font-size: 0.8rem; color: var(--text-sec); padding: 5px 0; }
+        .cal-day { background: #f9fafb; border: 1px solid var(--border); border-radius: 8px; padding: 5px; text-align: center; min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; cursor: pointer; transition: all 0.2s;}
+        .cal-day:hover { border-color: var(--primary); background: white; }
+        .cal-day.empty { background: transparent; border: none; cursor: default; }
+        .cal-day.today { background: #eef2ff; border-color: var(--primary); }
+        .cal-day.has-debt { background-color: #fffbeb; border-color: var(--warning); }
+        .cal-date { font-size: 0.9rem; font-weight: bold; }
+        .cal-badge { background: var(--danger); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; margin-top: 5px; font-weight: bold; }
+
         @media (max-width: 768px) {
             body { padding: 10px; padding-top: 20px; }
             .top-bar { flex-direction: column; gap: 10px; align-items: stretch; }
@@ -204,6 +220,9 @@
             .chk-group { width: 100%; margin-bottom: 5px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
             .installment-row > div:last-child { display: flex; width: 100%; justify-content: space-between; align-items: center; }
             .home-lists-grid { grid-template-columns: 1fr; }
+            .calendar-grid { gap: 2px; }
+            .cal-day { min-height: 50px; padding: 2px; }
+            .cal-badge { font-size: 0.6rem; padding: 1px 4px; }
         }
     </style>
 </head>
@@ -230,6 +249,13 @@
         <button class="nav-btn" onclick="switchView('agenda')" id="tab-agenda">📅 Agenda</button>
     </div>
 
+    <div class="global-filter-container">
+        <select id="globalFilter" onchange="checkAndRenderAll()">
+            <option value="ALL">🔍 VISÃO GERAL: TODAS AS DÍVIDAS / COBRADORES</option>
+            <option value="">👤 SEM COBRADOR ESPECÍFICO (PADRÃO)</option>
+        </select>
+    </div>
+
     <div class="top-bar">
         <div class="search-box">
             <span class="search-icon">🔍</span>
@@ -248,11 +274,6 @@
     </div>
 
     <div id="view-home" class="view-section active">
-        <div style="margin-bottom: 20px;">
-            <select id="homeFilter" onchange="renderHome()" style="width: 100%; padding: 15px; font-weight: bold; border-radius: 12px; border: 1px solid var(--primary); color: var(--primary); background: white;">
-                <option value="ALL">🔍 VISÃO GERAL: TODAS AS DÍVIDAS</option>
-            </select>
-        </div>
         <div class="dashboard-grid">
             <div class="dash-card"><div class="dash-title">Total Ativas</div><div class="dash-value" id="dash-total">0</div></div>
             <div class="dash-card"><div class="dash-title">Em Dia</div><div class="dash-value" id="dash-em-dia" style="color: var(--success)">0</div></div>
@@ -335,6 +356,15 @@
     </div>
 
     <div id="view-agenda" class="view-section">
+        <div class="card" style="padding: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <button class="btn-small" onclick="changeCalMonth(-1)">◀ Mês Ant.</button>
+                <h3 id="calMonthLabel" style="margin: 0; color: var(--primary);">Mês Ano</h3>
+                <button class="btn-small" onclick="changeCalMonth(1)">Próximo ▶</button>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+        </div>
+
         <div id="agendaList"></div>
     </div>
 
@@ -370,6 +400,7 @@
     let cobradores = [];
     let tempGroups = [];
     let editingCobradorId = null;
+    let calCurrentDate = new Date(); // Controle do Calendário
 
     auth.onAuthStateChanged((user) => {
         if (user) {
@@ -439,9 +470,9 @@
     }
 
     function updateCobradorSelects() {
-        const hf = document.getElementById('homeFilter'); const currentVal = hf.value;
-        hf.innerHTML = '<option value="ALL">🔍 VISÃO GERAL: TODAS AS DÍVIDAS</option>' + cobradores.map(c => `<option value="${c.firebaseId}">📄 Filtrar: ${c.name}</option>`).join('');
-        if(cobradores.find(c => c.firebaseId === currentVal)) hf.value = currentVal;
+        const hf = document.getElementById('globalFilter'); const currentVal = hf.value;
+        hf.innerHTML = '<option value="ALL">🔍 VISÃO GERAL: TODAS AS DÍVIDAS / COBRADORES</option><option value="">👤 SEM COBRADOR ESPECÍFICO (PADRÃO)</option>' + cobradores.map(c => `<option value="${c.firebaseId}">🏢 Filtrar: ${c.name}</option>`).join('');
+        if(cobradores.find(c => c.firebaseId === currentVal) || currentVal === '' || currentVal === 'ALL') hf.value = currentVal;
         
         const cs = document.getElementById('inputCobradorId');
         cs.innerHTML = '<option value="">-- Selecione o Cobrador --</option>' + cobradores.map(c => `<option value="${c.firebaseId}">${c.name}</option>`).join('') + '<option value="MANUAL" style="color:var(--danger); font-weight:bold;">+ Cadastrar Novo Manualmente</option>';
@@ -543,7 +574,7 @@
             if(!mn) return alert("Preencha o nome do cobrador manual.");
             const newRef = db.ref('users/' + currentUser.uid + '/cobradores').push();
             newRef.set({ name: mn, paymentInfo: mp }); finalCobId = newRef.key;
-        } else if (!cobId) return alert("Selecione um Cobrador Responsável.");
+        }
 
         let arr=[]; const [ys, ms, ds] = d.split('-'); const sy=parseInt(ys), sm=parseInt(ms)-1, sd=parseInt(ds); let pc=1, off=0;
         tempGroups.forEach(g=>{ for(let i=0;i<g.qtd;i++){ let dt=new Date(sy,sm+off,sd); if(dt.getDate()!==sd) dt=new Date(sy,sm+off+1,0); 
@@ -605,11 +636,15 @@
 
     // --- VIEWS E RENDER ---
     function renderHome() {
-        const filterVal = document.getElementById('homeFilter').value;
+        const filterVal = document.getElementById('globalFilter').value;
         const today = new Date(); today.setHours(0,0,0,0);
         const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
         let countActive = 0, countLate = 0, countOnTime = 0, todayParcels = [], lateClients = [];
-        let targetClients = filterVal !== 'ALL' ? clients.filter(c => c.cobradorId === filterVal) : clients;
+        
+        let targetClients = clients;
+        if(filterVal !== 'ALL') {
+            targetClients = clients.filter(c => (c.cobradorId || "") === filterVal);
+        }
 
         targetClients.forEach(c => {
             let hasActive=false, hasLate=false, lateCount=0;
@@ -633,7 +668,12 @@
 
     function renderClients() {
         const l=document.getElementById('clientsList'), term=document.getElementById('searchBar').value.toLowerCase(); l.innerHTML='';
-        const fil=clients.filter(c=>c.name.toLowerCase().includes(term)).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
+        const filterVal = document.getElementById('globalFilter').value;
+        
+        let targetClients = clients;
+        if(filterVal !== 'ALL') targetClients = clients.filter(c => (c.cobradorId || "") === filterVal);
+
+        const fil=targetClients.filter(c=>c.name.toLowerCase().includes(term)).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
         const todayStr = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
 
         if(fil.length===0){l.innerHTML='<div style="text-align:center;padding:40px;color:#999">Nada encontrado.</div>';return;}
@@ -678,9 +718,58 @@
         });
     }
 
+    function changeCalMonth(offset) {
+        calCurrentDate.setMonth(calCurrentDate.getMonth() + offset);
+        renderAgenda();
+    }
+
+    function scrollToDate(dateStr) {
+        const el = document.getElementById('agenda-date-' + dateStr);
+        if(el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.style.backgroundColor = '#fef3c7'; setTimeout(() => el.style.backgroundColor = '', 2000);
+        } else {
+            alert('Nenhuma cobrança pendente para este dia.');
+        }
+    }
+
     function renderAgenda() {
-        const container = document.getElementById('agendaList'); container.innerHTML = ''; let flatList = []; const today = new Date(); today.setHours(0,0,0,0);
-        clients.forEach(client => client.installments.forEach(inst => { if (!inst.paid) flatList.push({ ...inst, clientName: client.name, clientPhone: client.phone, firebaseId: client.firebaseId }); }));
+        const filterVal = document.getElementById('globalFilter').value;
+        let targetClients = filterVal !== 'ALL' ? clients.filter(c => (c.cobradorId || "") === filterVal) : clients;
+
+        // --- GERADOR DO CALENDÁRIO ---
+        const year = calCurrentDate.getFullYear();
+        const month = calCurrentDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        document.getElementById('calMonthLabel').innerText = `${monthNames[month]} ${year}`;
+
+        let debtCounts = {};
+        targetClients.forEach(c => c.installments.forEach(inst => {
+            if (!inst.paid) debtCounts[inst.dueDate] = (debtCounts[inst.dueDate] || 0) + 1;
+        }));
+
+        let calHtml = '';
+        const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        dayNames.forEach(d => calHtml += `<div class="cal-day-header">${d}</div>`);
+        for (let i = 0; i < firstDay; i++) calHtml += `<div class="cal-day empty"></div>`;
+
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const count = debtCounts[dateStr] || 0;
+            const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+            let badgeHtml = count > 0 ? `<span class="cal-badge">${count} div.</span>` : '';
+            let classes = `cal-day ${isToday ? 'today' : ''} ${count > 0 ? 'has-debt' : ''}`;
+            calHtml += `<div class="${classes}" onclick="scrollToDate('${dateStr}')"><span class="cal-date">${day}</span>${badgeHtml}</div>`;
+        }
+        document.getElementById('calendarGrid').innerHTML = calHtml;
+
+        // --- LISTA DA AGENDA ---
+        const container = document.getElementById('agendaList'); container.innerHTML = ''; 
+        let flatList = []; today.setHours(0,0,0,0);
+        targetClients.forEach(client => client.installments.forEach(inst => { if (!inst.paid) flatList.push({ ...inst, clientName: client.name, clientPhone: client.phone, firebaseId: client.firebaseId }); }));
         if (flatList.length === 0) { container.innerHTML = '<div style="text-align:center; padding:50px; color:#666;">🎉 Nenhuma cobrança pendente!</div>'; return; }
         flatList.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         const grouped = flatList.reduce((acc, item) => { if (!acc[item.dueDate]) acc[item.dueDate] = []; acc[item.dueDate].push(item); return acc; }, {});
@@ -688,7 +777,7 @@
         Object.keys(grouped).forEach(dateStr => {
             const items = grouped[dateStr]; const [y,m,d] = dateStr.split('-'); const checkDate = new Date(y, m-1, d);
             let headerClass = checkDate < today ? 'overdue' : (checkDate.getTime() === today.getTime() ? 'today' : '');
-            let html = `<div class="agenda-group"><div class="agenda-date-header ${headerClass}"><span>${formatDate(dateStr)} ${headerClass==='overdue'?'(Vencido)':(headerClass==='today'?'(Hoje)':'')}</span><span>${items.length} cobranças</span></div><div class="agenda-list">`;
+            let html = `<div id="agenda-date-${dateStr}" class="agenda-group" style="transition: background-color 0.5s;"><div class="agenda-date-header ${headerClass}"><span>${formatDate(dateStr)} ${headerClass==='overdue'?'(Vencido)':(headerClass==='today'?'(Hoje)':'')}</span><span>${items.length} cobranças</span></div><div class="agenda-list">`;
             items.forEach(item => {
                 html += `<div class="agenda-item"><div><div class="ag-client-name">${item.clientName}</div><div class="ag-parcel-info">Parcela ${item.number} • ${formatMoney(item.value)}</div></div><div class="ag-actions"><button class="btn-whatsapp ${item.clientPhone?'':'disabled'}" onclick="handleZapClick('${item.clientPhone}', '${item.clientName}', ${item.number}, ${item.value}, '${item.dueDate}', 'auto', '${item.firebaseId}', ${item.id}, ${item.contacted?'true':'false'})">${item.contacted?'✅':'📱'}</button></div></div>`;
             });
@@ -783,22 +872,20 @@
         const isGrouped = Array.isArray(parcelData);
         const valorReal = isGrouped ? parcelData.reduce((a,b)=>a+b.value,0) : parcelData.value;
         const parcelasReal = isGrouped ? `Parcelas ${parcelData.map(p=>p.number).join(', ')}` : `Parcela ${parcelData.number}`;
-        const dataReal = isGrouped ? formatDate(parcelData[0].dueDate) : formatDate(parcelData.dueDate); // usa a data da primeira pra ref
+        const dataReal = isGrouped ? formatDate(parcelData[0].dueDate) : formatDate(parcelData.dueDate);
 
         if(isGrouped) {
             parcelLines = parcelData.map(p => `[Parcela ${p.number}]: vencimento em ${formatDate(p.dueDate)} - ${formatMoney(p.value)}`).join("\n");
         } else {
             parcelLines = `[${parcelasReal}]: vencimento em ${dataReal} - ${formatMoney(valorReal)}`;
-            // Reajusta type se for 'auto'
             if(msgType === 'auto') {
                 const t=new Date(); t.setHours(0,0,0,0); const d=new Date(parcelData.dueDate+'T00:00:00');
                 msgType = d.getTime()===t.getTime() ? 'today' : (d<t ? 'late' : 'tomorrow');
             }
         }
 
-        // Puxa o Cobrador e Template
         let templatePersonalizado = null;
-        let pixInfo = "\n\nO pagamento será realizado via PIX,\nutilizando a chave abaixo:\n\nChave PIX: 17.466.646.0002-42\n\nTitular: ASSOCIAÇÃO EDUCACIONAL MODOTTE\n(FARON – VILHENA)";
+        let pixInfo = "\n\nPor favor, realize o pagamento conforme combinado. Qualquer dúvida, estou à disposição.";
 
         const client = clients.find(c => c.firebaseId === firebaseId);
         if(client && client.cobradorId) {
@@ -816,7 +903,6 @@
                 .replace(/{valor}/g, formatMoney(valorReal))
                 .replace(/{data}/g, dataReal);
         } else {
-            // Padrão Sistema
             if (msgType === 'today') intro = `Olá ${name}!\n\nConforme nosso acordo, hoje é a data do pagamento de ${parcelasReal} referente ao valor total de ${formatMoney(valorReal)}.`;
             else if (msgType === 'late') intro = `Olá ${name}!\n\nConforme nosso acordo, verificamos que a data do pagamento já passou. O valor em aberto é de ${formatMoney(valorReal)}.`;
             else if (msgType === 'tomorrow') intro = `Olá ${name}!\n\nConforme nosso acordo, o vencimento é amanhã. Total: ${formatMoney(valorReal)}.`;
@@ -825,7 +911,6 @@
 
         const msg = intro + "\n\n" + parcelLines + pixInfo;
         
-        // Marca como contactado
         if(client) {
             if(isGrouped) { parcelData.forEach(pG => { const p = client.installments.find(x => x.id === pG.id); if(p) p.contacted = true; }); } 
             else { const p = client.installments.find(x => x.id === parcelData.id); if(p) p.contacted = true; }

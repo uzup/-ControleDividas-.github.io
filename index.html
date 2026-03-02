@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestor Financeiro Cloud 7.3</title>
+    <title>Gestor Financeiro Cloud 7.4</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -109,7 +109,7 @@
         input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; }
         
         .btn { border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; }
-        .btn-primary { background-color: var(--primary); color: white; width: 100%; }
+        .btn-primary { background-color: var(--primary); color: white; width: 100%; margin-top: 20px; }
         .btn-small { background-color: var(--text-main); color: white; padding: 10px 16px; font-size: 0.9rem; }
         .btn-toggle { background: #eef2ff; color: var(--primary); border: 1px solid #c7d2fe; width: 100%; margin-bottom: 20px; }
         .btn-toggle:hover { background: #e0e7ff; }
@@ -254,7 +254,7 @@
     <div class="global-filter-container">
         <select id="globalFilter" onchange="checkAndRenderAll()">
             <option value="ALL">🔍 VISÃO GERAL: TODAS AS DÍVIDAS</option>
-            </select>
+        </select>
     </div>
 
     <div class="top-bar">
@@ -713,11 +713,19 @@
             const urgencyIcon = c.installments.some(p=>!p.paid&&p.dueDate===todayStr) ? '<span class="urgent-icon" title="Vence Hoje">❗</span>' : '';
             const cobData = cobradores.find(cb => cb.firebaseId === c.cobradorId); const cobNomeDisplay = cobData ? cobData.name : 'Sem Cobrador (Padrão)';
             const feeNameDisplay = c.feeName || 'Honorários';
+            
+            // CONTAGEM DE PARCELAS PARA O MODO MINIMIZADO
+            const totalParcels = c.installments.length;
+            const paidParcels = c.installments.filter(p => p.paid).length;
+            const pendingParcels = totalParcels - paidParcels;
 
             l.innerHTML+=`
             <div class="card client-card status-${st} ${c.isExpanded?'is-open':''}">
                 <div class="client-header" onclick="toggleCard('${c.firebaseId}')">
-                    <div class="header-info"><h2>${c.name} ${urgencyIcon}</h2> <span>🏢 <b>${cobNomeDisplay}</b> • ${c.installments.length} parcelas • ${sl}</span></div>
+                    <div class="header-info">
+                        <h2>${c.name} ${urgencyIcon}</h2> 
+                        <span><b>Total: ${totalParcels} • Pagas: ${paidParcels} • Pendentes: ${pendingParcels}</b> • ${sl}</span>
+                    </div>
                     <div class="header-actions"><span class="chevron">▼</span><button class="btn-trash" onclick="deleteClient(event, '${c.firebaseId}')">🗑</button></div>
                 </div>
                 <div class="client-body">
@@ -891,6 +899,7 @@
         buildAndSendZap(phone, name, parcels, msgType, firebaseId);
     }
 
+    // --- NOVA FUNÇÃO DE MENSAGEM PADRÃO ---
     function buildAndSendZap(phone, name, parcelData, msgType, firebaseId) {
         if (!phone) return alert("Sem telefone.");
         const cleanPhone = phone.replace(/\D/g, ''); 
@@ -914,19 +923,13 @@
         }
 
         let templatePersonalizado = null;
-        let pixInfo = "\n\nO pagamento será realizado da seguinte forma:\n\nChave PIX: 17.466.646.0002-42\n\nTitular: ASSOCIAÇÃO EDUCACIONAL MODOTTE (FARON – VILHENA)";
-        let cobradorTitular = "ASSOCIAÇÃO EDUCACIONAL MODOTTE (FARON – VILHENA)";
-        let formaDePagamento = "Chave PIX: 17.466.646.0002-42";
+        let formaDePagamento = "Nenhuma forma de pagamento especificada.";
 
         const client = clients.find(c => c.firebaseId === firebaseId);
         if(client && client.cobradorId) {
             const cob = cobradores.find(cb => cb.firebaseId === client.cobradorId);
             if(cob) {
-                if(cob.paymentInfo) {
-                    formaDePagamento = cob.paymentInfo;
-                    pixInfo = `\n\nO pagamento será realizado da seguinte forma:\n\n${cob.paymentInfo}`;
-                }
-                if(cob.name) cobradorTitular = cob.name;
+                if(cob.paymentInfo) formaDePagamento = cob.paymentInfo;
                 if(cob.msgTemplate) templatePersonalizado = cob.msgTemplate;
             }
         }
@@ -937,15 +940,15 @@
                 .replace(/{parcelas}/g, parcelasReal)
                 .replace(/{valor}/g, formatMoney(valorReal))
                 .replace(/{data}/g, dataReal);
-            msg = intro + "\n\n" + parcelLines + pixInfo;
+            msg = intro + "\n\n" + parcelLines + "\n\nO pagamento será realizado da seguinte forma:\n\n" + formaDePagamento;
         } else {
             let introText = "";
             if (msgType === 'today') introText = `Hoje é a data do pagamento (${dataReal}).`;
-            else if (msgType === 'late') introText = `Verificamos que a data do pagamento (${dataReal}) já passou.`;
+            else if (msgType === 'late') introText = `Verificamos que a data do pagamento ${dataReal} já passou.`;
             else if (msgType === 'tomorrow') introText = `Lembramos que a data do pagamento é amanhã (${dataReal}).`;
             else introText = `Segue o lembrete de pagamento.`;
 
-            msg = `Olá ${name}!\n\n${introText}\n\n${parcelLines}\n\nO pagamento será realizado da seguinte forma:\n\n${formaDePagamento}\n\nTitular: ${cobradorTitular}`;
+            msg = `Olá ${name}!\n\n${introText}\n\n${parcelLines}\n\nO pagamento será realizado da seguinte forma:\n\n${formaDePagamento}`;
         }
         
         if(client) {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestor Financeiro Cloud 8.0</title>
+    <title>Gestor Financeiro Cloud 8.1</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -48,7 +48,7 @@
             width: 100%; max-width: 400px; text-align: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
-        .login-card h1 { color: var(--primary); margin-bottom: 5px; margin-top: 0; }
+        .login-card h1 { color: var(--primary); margin-bottom: 10px; margin-top: 0; }
         .login-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
         .btn-auth { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; }
         .btn-login { background: var(--primary); color: white; transition: background 0.3s; }
@@ -89,9 +89,10 @@
         .notification-badge { position: absolute; top: 0; right: 0; background: var(--danger); color: white; font-size: 0.7rem; font-weight: bold; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
         .notification-badge.hidden { display: none; }
 
+        /* MODAIS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
         .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
-        .modal-content { background: white; width: 90%; max-width: 500px; max-height: 80vh; border-radius: 16px; padding: 20px; overflow-y: auto; }
+        .modal-content { background: white; width: 90%; max-width: 500px; max-height: 80vh; border-radius: 16px; padding: 20px; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
         .btn-close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
@@ -107,18 +108,16 @@
         .card { background: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 24px; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
         .card-form { padding: 24px; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .form-group { display: flex; flex-direction: column; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 15px;}
         label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #f9fafb; font-family: inherit; }
+        input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #f9fafb; font-family: inherit; width: 100%; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; }
         
         .btn { border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; }
-        .btn-primary { background-color: var(--primary); color: white; width: 100%; margin-top: 20px; }
+        .btn-primary { background-color: var(--primary); color: white; width: 100%; margin-top: 10px; }
         .btn-small { background-color: var(--text-main); color: white; padding: 10px 16px; font-size: 0.9rem; cursor: pointer;}
         
-        /* Botões do calendário menores */
         .btn-cal-nav { padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
-
         .btn-toggle { background: #eef2ff; color: var(--primary); border: 1px solid #c7d2fe; width: 100%; margin-bottom: 20px; }
         .btn-toggle:hover { background: #e0e7ff; }
         .hidden { display: none !important; }
@@ -136,15 +135,14 @@
         .client-card.status-atrasado { border-left-color: var(--danger); }
         .client-card.status-pendente { border-left-color: var(--warning); }
         
-        /* Layout do Cabeçalho Minimizado */
         .client-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: white; flex-wrap: nowrap; gap: 10px; }
         .client-header:hover { background-color: #f9fafb; }
         .header-info { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
         .header-info h2 { margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
         .parcel-text-info { font-size: 0.85rem; color: var(--text-sec); display: flex; gap: 10px; flex-wrap: wrap; }
         
-        .header-actions { display: flex; align-items: center; gap: 12px; }
-        .chevron { transition: transform 0.3s; font-size: 0.8rem; color: var(--text-sec); }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+        .chevron { transition: transform 0.3s; font-size: 0.8rem; color: var(--text-sec); margin-left: 5px; }
         .is-open .chevron { transform: rotate(180deg); }
         .client-body { display: none; padding: 0 20px 20px 20px; animation: slideDown 0.3s ease-out; border-top: 1px solid var(--border); }
         .is-open .client-body { display: block; }
@@ -173,8 +171,10 @@
         .btn-note.has-note { filter: none; opacity: 1; transform: scale(1.3); text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .btn-whatsapp { background: none; border: none; cursor: pointer; color: #25D366; font-size: 1.2rem; padding: 5px; margin-right: 10px; }
         .btn-whatsapp.disabled { color: #ccc; cursor: not-allowed; }
-        .btn-trash { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; padding: 5px; }
-        .btn-trash:hover { color: var(--danger); }
+        
+        .icon-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #9ca3af; transition: color 0.2s; padding: 5px; }
+        .icon-btn:hover { color: var(--primary); }
+        .icon-btn.trash:hover { color: var(--danger); }
         
         .tag { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
         .tag-success { background: #dcfce7; color: #166534; }
@@ -189,21 +189,11 @@
         .agenda-date-header.today { background: #dcfce7; color: #166534; border-color: #10b981; }
         .agenda-list { border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; background: white; }
         
-        /* Efeito de Destaque na Agenda */
-        .agenda-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f3f4f6; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; border: 1px solid transparent; border-radius: 8px; margin-bottom: 2px; }
-        .agenda-item:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 6px 15px rgba(0,0,0,0.1); border-color: var(--primary); background: #fff; z-index: 2; position: relative; }
-        .agenda-click-area { flex-grow: 1; cursor: pointer; display: flex; flex-direction: column; justify-content: center; }
-
         .view-section { display: none; }
         .view-section.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         #fileInput { display: none; }
-        
-        .client-edit-area { border-bottom: 1px dashed #eee; padding-bottom: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .edit-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.9rem; color: var(--text-sec); }
-        .btn-edit-small { background: none; border: 1px solid #eee; border-radius: 4px; padding: 2px 8px; cursor: pointer; color: var(--primary); font-size: 0.8rem; font-weight: 600;}
-        .btn-edit-small:hover { background: #f9fafb; border-color: var(--primary); }
 
         .urgent-icon { color: var(--danger); font-size: 1.2rem; font-weight: bold; margin-left: 8px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
@@ -224,10 +214,12 @@
         .cal-day:hover { border-color: var(--primary); background: white; }
         .cal-day.empty { background: transparent; border: none; cursor: default; }
         .cal-day.today { background: #eef2ff; border-color: var(--primary); }
-        .cal-day.has-debt { background-color: #fffbeb; border-color: var(--warning); }
         .cal-day.selected { border: 2px solid var(--primary) !important; background-color: #e0e7ff !important; }
         .cal-date { font-size: 0.9rem; font-weight: bold; }
-        .cal-badge { background: var(--danger); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; margin-top: 5px; font-weight: bold; }
+        
+        .cal-badge { color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; margin-top: 5px; font-weight: bold; }
+        .cal-badge.past { background: var(--danger); }
+        .cal-badge.future { background: var(--warning); }
 
         .clear-filter-btn { display: none; width: 100%; padding: 10px; background: #eef2ff; color: var(--primary); border: 1px dashed var(--primary); border-radius: 8px; margin-bottom: 15px; font-weight: bold; cursor: pointer; }
         .clear-filter-btn.active { display: block; }
@@ -247,7 +239,6 @@
             .cal-badge { font-size: 0.6rem; padding: 1px 4px; }
             .client-header { flex-direction: column; align-items: flex-start; }
             .header-actions { width: 100%; justify-content: flex-end; margin-top: 10px; }
-            
             .btn-cal-nav { padding: 4px 8px; font-size: 0.75rem; }
             #calMonthLabel { font-size: 1rem !important; }
         }
@@ -324,22 +315,21 @@
         <button class="btn btn-toggle" onclick="toggleForm('newCobradorFormWrapper')">➕ Novo Cobrador</button>
         
         <div class="card card-form hidden" id="newCobradorFormWrapper">
-            <h3 style="margin-top:0; color:var(--primary);" id="cobFormTitle">Novo Cobrador</h3>
+            <h3 style="margin-top:0; color:var(--primary);">Novo Cobrador</h3>
             <div class="form-group">
                 <label>Nome do Cobrador / Empresa</label>
                 <input type="text" id="cobNome" placeholder="Ex: João Cobranças">
             </div>
-            <div class="form-group" style="margin-top: 15px;">
+            <div class="form-group">
                 <label>Dados para Recebimento (Chave PIX, Conta, Titular...)</label>
                 <textarea id="cobPagamento" rows="3" placeholder="Ex: Chave PIX: 123...&#10;Titular: João da Silva"></textarea>
             </div>
-            <div class="form-group" style="margin-top: 15px;">
+            <div class="form-group">
                 <label>Mensagem Padrão de Cobrança (Opcional)</label>
                 <small style="color:var(--text-sec); display:block; margin-bottom:5px;">Variáveis permitidas: <b style="color:var(--primary)">{nome}</b>, <b style="color:var(--primary)">{parcelas}</b>, <b style="color:var(--primary)">{valor}</b>, <b style="color:var(--primary)">{data}</b>, <b style="color:var(--primary)">{forma de pagamento}</b></small>
                 <textarea id="cobTemplate" rows="4" placeholder="Ex: Olá {nome}! Verificamos que a data do pagamento {data} já passou..."></textarea>
             </div>
-            <button class="btn btn-primary" style="margin-top: 20px;" id="btnSaveCobrador" onclick="addOrUpdateCobrador()">Salvar Cobrador</button>
-            <button class="btn" id="btnCancelEditCob" onclick="cancelEditCobrador()" style="display:none; width:100%; margin-top:10px; background:#e5e7eb;">Cancelar Edição</button>
+            <button class="btn btn-primary" onclick="addCobrador()">Salvar Cobrador</button>
         </div>
         <div id="cobradoresList"></div>
     </div>
@@ -360,7 +350,7 @@
                 <div id="manualCobradorDiv" style="display:none; grid-column: 1 / -1; background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px dashed var(--danger);">
                     <h4 style="margin-top:0; color:var(--danger)">Cadastrar Novo Cobrador Manualmente</h4>
                     <div class="form-group"><label>Nome do Novo Cobrador</label><input type="text" id="manualCobNome" placeholder="Ex: Maria Cobranças"></div>
-                    <div class="form-group" style="margin-top:10px;"><label>Dados de Pagamento (PIX)</label><textarea id="manualCobPag" rows="2" placeholder="Chave PIX: ..."></textarea></div>
+                    <div class="form-group"><label>Dados de Pagamento (PIX)</label><textarea id="manualCobPag" rows="2" placeholder="Chave PIX: ..."></textarea></div>
                 </div>
 
                 <div class="form-group"><label>1ª Data</label><input type="date" id="inputDate"></div>
@@ -388,7 +378,7 @@
                 <ul id="previewList" class="preview-list"></ul>
                 <div class="total-badge" id="totalDisplay">Total: R$ 0,00</div>
             </div>
-            <button class="btn btn-primary" style="margin-top: 20px;" onclick="addClient()">Salvar Devedor</button>
+            <button class="btn btn-primary" onclick="addClient()">Salvar Devedor</button>
         </div>
         <div id="loadingMsg" style="text-align:center; padding:20px; color:#666;">Carregando dados da nuvem...</div>
         <div id="clientsList"></div>
@@ -408,6 +398,37 @@
         <div id="agendaList"></div>
     </div>
 
+</div>
+
+<div class="modal-overlay" id="editClientModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">✎ Editar Devedor</div>
+            <button class="btn-close-modal" onclick="closeEditClientModal()">&times;</button>
+        </div>
+        <div class="form-group"><label>Nome</label><input type="text" id="editClientNameInput"></div>
+        <div class="form-group"><label>WhatsApp</label><input type="text" id="editClientPhoneInput"></div>
+        <div class="form-group">
+            <label>Cobrador Responsável</label>
+            <select id="editClientCobradorSelect"></select>
+        </div>
+        <button class="btn btn-primary" onclick="saveClientEdit()">Salvar Alterações</button>
+        <button class="btn" style="width:100%; margin-top:10px; background:#e5e7eb;" onclick="closeEditClientModal()">Cancelar</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editCobradorModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">✎ Editar Cobrador</div>
+            <button class="btn-close-modal" onclick="closeEditCobModal()">&times;</button>
+        </div>
+        <div class="form-group"><label>Nome / Empresa</label><input type="text" id="editCobNomeInput"></div>
+        <div class="form-group"><label>Dados para Recebimento</label><textarea id="editCobPagamentoInput" rows="3"></textarea></div>
+        <div class="form-group"><label>Mensagem Padrão</label><textarea id="editCobTemplateInput" rows="4"></textarea></div>
+        <button class="btn btn-primary" onclick="saveCobradorEdit()">Salvar Alterações</button>
+        <button class="btn" style="width:100%; margin-top:10px; background:#e5e7eb;" onclick="closeEditCobModal()">Cancelar</button>
+    </div>
 </div>
 
 <div class="modal-overlay" id="notifModal">
@@ -439,10 +460,9 @@
     let clients = [];
     let cobradores = [];
     let tempGroups = [];
-    let editingCobradorId = null;
     let calCurrentDate = new Date(); 
     let agendaDateFilter = null;
-    let isLoginMode = true; // Variável para controlar a tela de login/cadastro
+    let isLoginMode = true; 
 
     // --- SISTEMA DE LOGIN E CADASTRO ---
     auth.onAuthStateChanged((user) => {
@@ -464,7 +484,6 @@
         isLoginMode = !isLoginMode;
         document.getElementById('authError').style.display = 'none';
         document.getElementById('authSuccess').style.display = 'none';
-        
         if (isLoginMode) {
             document.getElementById('auth-subtitle').innerText = "Acesse sua conta ☁️";
             document.getElementById('btnAction').innerText = "Entrar";
@@ -480,46 +499,28 @@
         }
     }
 
-    function handleAuthAction() {
-        if (isLoginMode) login();
-        else register();
-    }
-
-    function login() { 
-        auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(err => showError(err.message)); 
-    }
-    
-    function register() { 
-        auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(err => showError(err.message)); 
-    }
-    
+    function handleAuthAction() { if (isLoginMode) login(); else register(); }
+    function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(err => showError(err.message)); }
+    function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(err => showError(err.message)); }
     function logout() { auth.signOut(); }
     
     function resetPassword() {
         const email = document.getElementById('email').value;
         document.getElementById('authError').style.display = 'none';
         document.getElementById('authSuccess').style.display = 'none';
-
-        if(!email) {
-            showError("Por favor, digite seu e-mail no campo acima para redefinir a senha.");
-            return;
-        }
-        
+        if(!email) { showError("Por favor, digite seu e-mail no campo acima para redefinir a senha."); return; }
         auth.sendPasswordResetEmail(email)
             .then(() => {
                 const successDiv = document.getElementById('authSuccess');
                 successDiv.textContent = "E-mail de redefinição enviado! Verifique sua caixa de entrada ou spam.";
                 successDiv.style.display = 'block';
             })
-            .catch((error) => {
-                showError(error.message);
-            });
+            .catch((error) => { showError(error.message); });
     }
 
     function showError(msg) {
         document.getElementById('authSuccess').style.display = 'none';
-        const div = document.getElementById('authError'); 
-        div.style.display = 'block';
+        const div = document.getElementById('authError'); div.style.display = 'block';
         if(msg.includes('weak-password')) div.textContent = "Senha fraca (mín. 6 dígitos).";
         else if(msg.includes('email-already-in-use')) div.textContent = "E-mail já cadastrado. Volte e faça login.";
         else if(msg.includes('user-not-found')) div.textContent = "Usuário não encontrado.";
@@ -530,11 +531,8 @@
 
     function toggleForm(id) {
         const el = document.getElementById(id);
-        if (el.classList.contains('hidden')) {
-            el.classList.remove('hidden');
-        } else {
-            el.classList.add('hidden');
-        }
+        if (el.classList.contains('hidden')) el.classList.remove('hidden');
+        else el.classList.add('hidden');
     }
 
     function startDataSync() {
@@ -542,14 +540,12 @@
         db.ref('users/' + userId + '/cobradores').on('value', (snapshot) => {
             const data = snapshot.val();
             cobradores = data ? Object.keys(data).map(key => ({ ...data[key], firebaseId: key })) : [];
-            updateCobradorSelects();
-            checkAndRenderAll();
+            updateCobradorSelects(); checkAndRenderAll();
         });
         db.ref('users/' + userId + '/clients').on('value', (snapshot) => {
             const data = snapshot.val();
             clients = data ? Object.keys(data).map(key => ({ ...data[key], firebaseId: key })) : [];
-            updateFeeList();
-            checkAndRenderAll();
+            updateFeeList(); checkAndRenderAll();
         });
     }
 
@@ -564,38 +560,24 @@
         document.getElementById(`view-${v}`).classList.add('active');
         document.getElementById(`tab-${v}`).classList.add('active');
         
-        // RESETAR CALENDÁRIO AO MUDAR DE ABA
         calCurrentDate = new Date();
         agendaDateFilter = null;
-
         if(v === 'home') renderHome(); if(v === 'agenda') renderAgenda(); if(v === 'cobradores') renderCobradores();
     }
 
-    // --- IR DIRETO AO DEVEDOR VIA AGENDA ---
     function goToClient(firebaseId) {
         document.getElementById('searchBar').value = '';
         const target = clients.find(x => x.firebaseId === firebaseId);
         if(target) {
-            clients.forEach(c => {
-                if(c.firebaseId !== firebaseId && c.isExpanded) {
-                    c.isExpanded = false;
-                    updateCloud(c);
-                }
-            });
-            if(!target.isExpanded) {
-                target.isExpanded = true;
-                updateCloud(target);
-            }
+            clients.forEach(c => { if(c.firebaseId !== firebaseId && c.isExpanded) { c.isExpanded = false; updateCloud(c); } });
+            if(!target.isExpanded) { target.isExpanded = true; updateCloud(target); }
         }
-        
         switchView('clients');
-        
         setTimeout(() => {
             const el = document.getElementById('client-card-' + firebaseId);
             if (el) {
                 const y = el.getBoundingClientRect().top + window.scrollY - 20;
                 window.scrollTo({top: y, behavior: 'smooth'});
-                
                 el.style.transition = "box-shadow 0.3s";
                 el.style.boxShadow = "0 0 15px var(--primary)";
                 setTimeout(() => el.style.boxShadow = "0 4px 6px -1px rgba(0,0,0,0.1)", 2000);
@@ -609,6 +591,7 @@
         return new Date(d.getTime() + d.getTimezoneOffset() * 60000).toLocaleDateString('pt-BR');
     }
 
+    // --- COBRADORES & TAXAS EXTRAS ---
     function updateFeeList() {
         const fees = [...new Set(clients.map(c => c.feeName).filter(Boolean))];
         document.getElementById('feeList').innerHTML = fees.map(f => `<option value="${f}">`).join('');
@@ -630,40 +613,58 @@
         const p = document.getElementById('cobPagamento').value;
         const t = document.getElementById('cobTemplate').value;
         if(!n) return alert("Preencha o nome do cobrador.");
-        
-        if(editingCobradorId) {
-            db.ref('users/' + currentUser.uid + '/cobradores/' + editingCobradorId).update({ name: n, paymentInfo: p, msgTemplate: t });
-            alert("Cobrador atualizado!");
-        } else {
-            db.ref('users/' + currentUser.uid + '/cobradores').push({ name: n, paymentInfo: p, msgTemplate: t, isExpanded: false });
-            alert("Cobrador adicionado!");
-        }
-        cancelEditCobrador();
+        db.ref('users/' + currentUser.uid + '/cobradores').push({ name: n, paymentInfo: p, msgTemplate: t, isExpanded: false });
+        document.getElementById('cobNome').value = ''; document.getElementById('cobPagamento').value = ''; document.getElementById('cobTemplate').value = '';
         document.getElementById('newCobradorFormWrapper').classList.add('hidden');
+        alert("Cobrador adicionado!");
     }
 
-    function editCobradorFull(fid) {
+    // --- MODAIS DE EDIÇÃO ---
+    let editCobId = null;
+    function openEditCobModal(e, fid) {
+        e.stopPropagation();
         const c = cobradores.find(x => x.firebaseId === fid);
         if(!c) return;
-        editingCobradorId = fid;
-        document.getElementById('cobNome').value = c.name;
-        document.getElementById('cobPagamento').value = c.paymentInfo || '';
-        document.getElementById('cobTemplate').value = c.msgTemplate || '';
-        document.getElementById('cobFormTitle').textContent = "✏️ Editando Cobrador";
-        document.getElementById('btnSaveCobrador').textContent = "Atualizar Cobrador";
-        document.getElementById('btnCancelEditCob').style.display = "block";
-        document.getElementById('newCobradorFormWrapper').classList.remove('hidden');
-        window.scrollTo(0,0);
+        editCobId = fid;
+        document.getElementById('editCobNomeInput').value = c.name;
+        document.getElementById('editCobPagamentoInput').value = c.paymentInfo || '';
+        document.getElementById('editCobTemplateInput').value = c.msgTemplate || '';
+        document.getElementById('editCobradorModal').classList.add('active');
+    }
+    function closeEditCobModal() { document.getElementById('editCobradorModal').classList.remove('active'); editCobId = null; }
+    function saveCobradorEdit() {
+        if(!editCobId) return;
+        const n = document.getElementById('editCobNomeInput').value;
+        const p = document.getElementById('editCobPagamentoInput').value;
+        const t = document.getElementById('editCobTemplateInput').value;
+        db.ref('users/' + currentUser.uid + '/cobradores/' + editCobId).update({ name: n, paymentInfo: p, msgTemplate: t });
+        closeEditCobModal();
     }
 
-    function cancelEditCobrador() {
-        editingCobradorId = null;
-        document.getElementById('cobNome').value = '';
-        document.getElementById('cobPagamento').value = '';
-        document.getElementById('cobTemplate').value = '';
-        document.getElementById('cobFormTitle').textContent = "Novo Cobrador";
-        document.getElementById('btnSaveCobrador').textContent = "Salvar Cobrador";
-        document.getElementById('btnCancelEditCob').style.display = "none";
+    let editClientId = null;
+    function openEditClientModal(e, fid) {
+        e.stopPropagation();
+        const c = clients.find(x => x.firebaseId === fid);
+        if(!c) return;
+        editClientId = fid;
+        document.getElementById('editClientNameInput').value = c.name;
+        document.getElementById('editClientPhoneInput').value = c.phone;
+        
+        const sel = document.getElementById('editClientCobradorSelect');
+        sel.innerHTML = '<option value="">-- Sem Cobrador --</option>' + cobradores.map(cb => `<option value="${cb.firebaseId}">${cb.name}</option>`).join('');
+        sel.value = c.cobradorId || '';
+        
+        document.getElementById('editClientModal').classList.add('active');
+    }
+    function closeEditClientModal() { document.getElementById('editClientModal').classList.remove('active'); editClientId = null; }
+    function saveClientEdit() {
+        if(!editClientId) return;
+        const n = document.getElementById('editClientNameInput').value;
+        const p = document.getElementById('editClientPhoneInput').value;
+        const cob = document.getElementById('editClientCobradorSelect').value;
+        const c = clients.find(x => x.firebaseId === editClientId);
+        if(c) { c.name = n; c.phone = p; c.cobradorId = cob; updateCloud(c); }
+        closeEditClientModal();
     }
 
     function deleteCobrador(e, fid) {
@@ -677,14 +678,11 @@
         const target = cobradores.find(x => x.firebaseId === fid);
         if(target) {
             const wasExpanded = target.isExpanded;
-            // Fecha os outros
             cobradores.forEach(c => {
                 if(c.firebaseId !== fid && c.isExpanded) {
-                    c.isExpanded = false;
                     db.ref('users/' + currentUser.uid + '/cobradores/' + c.firebaseId).update({ isExpanded: false });
                 }
             });
-            // Altera o atual
             db.ref('users/' + currentUser.uid + '/cobradores/' + fid).update({ isExpanded: !wasExpanded });
         }
     }
@@ -697,14 +695,12 @@
                 <div class="client-header" onclick="toggleCobradorCard('${c.firebaseId}')">
                     <div class="header-info"><h2>🏢 ${c.name}</h2></div>
                     <div class="header-actions">
+                        <button class="icon-btn" title="Editar Cobrador" onclick="openEditCobModal(event, '${c.firebaseId}')">✎</button>
+                        <button class="icon-btn trash" onclick="deleteCobrador(event, '${c.firebaseId}')">🗑</button>
                         <span class="chevron">▼</span>
-                        <button class="btn-trash" onclick="deleteCobrador(event, '${c.firebaseId}')">🗑</button>
                     </div>
                 </div>
                 <div class="client-body">
-                    <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
-                        <button class="btn-edit-small" onclick="editCobradorFull('${c.firebaseId}')">✎ Editar Informações</button>
-                    </div>
                     <div style="margin-top:5px;">
                         <strong style="font-size:0.85rem; color:var(--text-sec);">DADOS DE PAGAMENTO:</strong>
                         <pre style="background:#f9fafb; padding:10px; border-radius:8px; margin-top:5px; border:1px solid var(--border); white-space:pre-wrap; font-family:inherit;">${c.paymentInfo || 'Nenhum'}</pre>
@@ -734,17 +730,14 @@
     function addClient() {
         const n=document.getElementById('inputName').value, p=document.getElementById('inputPhone').value, f=parseFloat(document.getElementById('inputFees').value)||0, fn=document.getElementById('inputFeeName').value||"Honorários", d=document.getElementById('inputDate').value;
         const cobId = document.getElementById('inputCobradorId').value;
-        
         if(!n||!d||tempGroups.length===0){alert("Preencha todos os campos vitais e adicione parcelas.");return;}
-        
         let finalCobId = cobId;
         if(cobId === 'MANUAL') {
             const mn = document.getElementById('manualCobNome').value; const mp = document.getElementById('manualCobPag').value;
             if(!mn) return alert("Preencha o nome do cobrador manual.");
             const newRef = db.ref('users/' + currentUser.uid + '/cobradores').push();
-            newRef.set({ name: mn, paymentInfo: mp }); finalCobId = newRef.key;
+            newRef.set({ name: mn, paymentInfo: mp, isExpanded: false }); finalCobId = newRef.key;
         }
-
         let arr=[]; const [ys, ms, ds] = d.split('-'); const sy=parseInt(ys), sm=parseInt(ms)-1, sd=parseInt(ds); let pc=1, off=0;
         tempGroups.forEach(g=>{ for(let i=0;i<g.qtd;i++){ let dt=new Date(sy,sm+off,sd); if(dt.getDate()!==sd) dt=new Date(sy,sm+off+1,0); 
         arr.push({id:Date.now()+Math.random(), number:pc++, value:g.value, dueDate:`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`, paid:false, note:""}); off++; } });
@@ -759,27 +752,12 @@
     function updateCloud(client) { if(client.firebaseId) db.ref('users/' + currentUser.uid + '/clients/' + client.firebaseId).set(client); }
     function renumberInstallments(client) { client.installments.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate)); client.installments.forEach((inst, index) => { inst.number = index + 1; }); }
 
-    function editClientCobrador(fid) {
-        const c = clients.find(x => x.firebaseId === fid); if(!c) return;
-        let text = "Mudar cobrador. Digite o número desejado:\n0. Nenhum/Padrão\n";
-        cobradores.forEach((cb, i) => text += `${i+1}. ${cb.name}\n`);
-        let res = prompt(text);
-        if(res !== null) {
-            let idx = parseInt(res) - 1;
-            if(res === '0') { c.cobradorId = ''; updateCloud(c); }
-            else if(cobradores[idx]) { c.cobradorId = cobradores[idx].firebaseId; updateCloud(c); }
-            else alert("Opção inválida.");
-        }
-    }
-    
     function editFeeName(fid) {
         const c = clients.find(x => x.firebaseId === fid); if(!c) return;
         const novo = prompt("Novo nome para a Taxa Extra:", c.feeName || "Honorários");
         if(novo && novo !== c.feeName) { c.feeName = novo; updateCloud(c); }
     }
 
-    function editClientName(fid) { const c=clients.find(x=>x.firebaseId===fid); if(c){ const n=prompt("Novo nome:",c.name); if(n&&n!==c.name){c.name=n;updateCloud(c);}}}
-    function editClientPhone(fid) { const c=clients.find(x=>x.firebaseId===fid); if(c){ const n=prompt("Novo WhatsApp:",c.phone); if(n&&n!==c.phone){c.phone=n;updateCloud(c);}}}
     function deleteClient(e, id) { e.stopPropagation(); if(confirm("Excluir devedor e dívidas?")) db.ref('users/'+currentUser.uid+'/clients/'+id).remove(); }
     function toggleFee(fid) { const c=clients.find(x=>x.firebaseId===fid); if(c){ c.feesPaid=!c.feesPaid; updateCloud(c); } }
     function toggleInstallment(fid, iid) { const c=clients.find(x=>x.firebaseId===fid); if(c){ const p=c.installments.find(x=>x.id===iid); if(p){p.paid=!p.paid; updateCloud(c);} } }
@@ -788,19 +766,14 @@
         const target = clients.find(x => x.firebaseId === fid);
         if(target) { 
             const wasExpanded = target.isExpanded;
-            
-            // Fecha todos os outros cards abertos
             clients.forEach(c => {
                 if(c.firebaseId !== fid && c.isExpanded) {
                     c.isExpanded = false;
                     updateCloud(c);
                 }
             });
-
             target.isExpanded = !wasExpanded; 
             updateCloud(target); 
-            
-            // Efeito Auto-Scroll para o card aberto
             if(target.isExpanded) {
                 setTimeout(() => {
                     const el = document.getElementById('client-card-' + fid);
@@ -838,13 +811,9 @@
     function renderHome() {
         const filterVal = document.getElementById('globalFilter').value;
         const today = new Date(); today.setHours(0,0,0,0);
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
         let countActive = 0, countLate = 0, countOnTime = 0, todayParcels = [], lateClients = [];
         
-        let targetClients = clients;
-        if(filterVal !== 'ALL') {
-            targetClients = clients.filter(c => (c.cobradorId || "") === filterVal);
-        }
+        let targetClients = filterVal !== 'ALL' ? clients.filter(c => (c.cobradorId || "") === filterVal) : clients;
 
         targetClients.forEach(c => {
             let hasActive=false, hasLate=false, lateCount=0;
@@ -869,10 +838,7 @@
     function renderClients() {
         const l=document.getElementById('clientsList'), term=document.getElementById('searchBar').value.toLowerCase(); l.innerHTML='';
         const filterVal = document.getElementById('globalFilter').value;
-        
-        let targetClients = clients;
-        if(filterVal !== 'ALL') targetClients = clients.filter(c => (c.cobradorId || "") === filterVal);
-
+        let targetClients = filterVal !== 'ALL' ? clients.filter(c => (c.cobradorId || "") === filterVal) : clients;
         const fil=targetClients.filter(c=>c.name.toLowerCase().includes(term)).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
         const todayStr = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
 
@@ -882,7 +848,7 @@
             const od=c.installments.some(p=>!p.paid&&checkStatus(p.dueDate)==='atrasado'), st=pct>=99.9?'pago':(od?'atrasado':'pendente');
             const sl=st==='pago'?'<span class="tag tag-success">Pago</span>':(st==='atrasado'?'<span class="tag tag-danger">Atrasado</span>':'<span class="tag tag-warning">Em dia</span>');
             const urgencyIcon = c.installments.some(p=>!p.paid&&p.dueDate===todayStr) ? '<span class="urgent-icon" title="Vence Hoje">❗</span>' : '';
-            const cobData = cobradores.find(cb => cb.firebaseId === c.cobradorId); const cobNomeDisplay = cobData ? cobData.name : 'Sem Cobrador (Padrão)';
+            const cobData = cobradores.find(cb => cb.firebaseId === c.cobradorId); const cobNomeDisplay = cobData ? cobData.name : 'Sem Cobrador';
             const feeNameDisplay = c.feeName || 'Honorários';
             
             const totalParcels = c.installments.length;
@@ -902,16 +868,12 @@
                     </div>
                     <div class="header-actions">
                         ${sl}
+                        <button class="icon-btn" title="Editar Devedor" onclick="openEditClientModal(event, '${c.firebaseId}')">✎</button>
+                        <button class="icon-btn trash" title="Excluir Devedor" onclick="deleteClient(event, '${c.firebaseId}')">🗑</button>
                         <span class="chevron">▼</span>
-                        <button class="btn-trash" onclick="deleteClient(event, '${c.firebaseId}')">🗑</button>
                     </div>
                 </div>
                 <div class="client-body">
-                    <div class="client-edit-area">
-                        <div class="edit-row"><span><b>Nome:</b> ${c.name}</span> <button class="btn-edit-small" onclick="editClientName('${c.firebaseId}')">✎ Editar</button></div>
-                        <div class="edit-row"><span><b>WhatsApp:</b> ${c.phone}</span> <button class="btn-edit-small" onclick="editClientPhone('${c.firebaseId}')">✎ Editar</button></div>
-                        <div class="edit-row"><span><b>Cobrador:</b> ${cobNomeDisplay}</span> <button class="btn-edit-small" onclick="editClientCobrador('${c.firebaseId}')">✎ Trocar</button></div>
-                    </div>
                     <div class="progress-container"><div class="progress-labels"><span>${pct.toFixed(0)}%</span><span>Falta: ${formatMoney(remain)}</span></div><div class="progress-track"><div class="progress-fill ${pct>=99.9?'full':''}" style="width:${pct}%"></div></div></div>
                     <div class="stats-grid"><div class="stat-item"><strong>Total</strong><div>${formatMoney(c.totalDebt)}</div></div><div class="stat-item"><strong>Pago</strong><div style="color:var(--success)">${formatMoney(paid)}</div></div><div class="stat-item"><strong>Falta</strong><div>${formatMoney(remain)}</div></div></div>
                     <div style="background:#eff6ff;padding:12px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
@@ -971,14 +933,17 @@
         dayNames.forEach(d => calHtml += `<div class="cal-day-header">${d}</div>`);
         for (let i = 0; i < firstDay; i++) calHtml += `<div class="cal-day empty"></div>`;
 
-        const today = new Date();
+        const today = new Date(); today.setHours(0,0,0,0);
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const count = debtCounts[dateStr] || 0;
             const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
             const isSelected = agendaDateFilter === dateStr;
             
-            let badgeHtml = count > 0 ? `<span class="cal-badge">${count} div.</span>` : '';
+            const loopDate = new Date(year, month, day);
+            let badgeClass = loopDate > today ? 'cal-badge future' : 'cal-badge past';
+
+            let badgeHtml = count > 0 ? `<span class="${badgeClass}">${count} div.</span>` : '';
             let classes = `cal-day ${isToday ? 'today' : ''} ${count > 0 ? 'has-debt' : ''} ${isSelected ? 'selected' : ''}`;
             
             calHtml += `<div class="${classes}" onclick="if(${count > 0}) filterAgendaByDate('${dateStr}')"><span class="cal-date">${day}</span>${badgeHtml}</div>`;
@@ -987,7 +952,7 @@
 
         // --- LISTA DA AGENDA ---
         const container = document.getElementById('agendaList'); container.innerHTML = ''; 
-        let flatList = []; today.setHours(0,0,0,0);
+        let flatList = [];
         
         targetClients.forEach(client => client.installments.forEach(inst => { 
             if (!inst.paid) {
@@ -1102,7 +1067,6 @@
         buildAndSendZap(phone, name, parcels, msgType, firebaseId);
     }
 
-    // --- NOVA FUNÇÃO DE MENSAGEM PADRÃO ---
     function buildAndSendZap(phone, name, parcelData, msgType, firebaseId) {
         if (!phone) return alert("Sem telefone.");
         const cleanPhone = phone.replace(/\D/g, ''); 
@@ -1144,7 +1108,7 @@
                 .replace(/{valor}/g, formatMoney(valorReal))
                 .replace(/{data}/g, dataReal)
                 .replace(/{forma de pagamento}/g, formaDePagamento);
-            msg = intro; // Se tiver template, o template controla tudo
+            msg = intro; 
         } else {
             let introText = "";
             if (msgType === 'today') introText = `Verificamos que a data do pagamento ${dataReal} é hoje.`;

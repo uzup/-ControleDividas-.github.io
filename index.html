@@ -189,7 +189,7 @@
         .agenda-date-header.today { background: #dcfce7; color: #166534; border-color: #10b981; }
         .agenda-list { border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; background: white; }
         
-        /* --- ESTILOS DOS ITENS DA AGENDA (ATUALIZADOS) --- */
+        /* --- ESTILOS DOS ITENS DA AGENDA --- */
         .agenda-item {
             display: flex;
             justify-content: space-between;
@@ -601,6 +601,15 @@
         
         calCurrentDate = new Date();
         agendaDateFilter = null;
+
+        // LÓGICA DE MINIMIZAR CARDS ABERTOS
+        if(v !== 'clients') {
+            clients.forEach(c => { if(c.isExpanded) { c.isExpanded = false; updateCloud(c); } });
+        }
+        if(v !== 'cobradores') {
+            cobradores.forEach(c => { if(c.isExpanded) { db.ref('users/' + currentUser.uid + '/cobradores/' + c.firebaseId).update({ isExpanded: false }); } });
+        }
+
         if(v === 'home') renderHome(); if(v === 'agenda') renderAgenda(); if(v === 'cobradores') renderCobradores();
     }
 
@@ -1087,8 +1096,15 @@
         const isMultiple = item.parcels.length > 1; const parcelNumbers = item.parcels.map(p => p.number).join(', ');
         const allContacted = item.parcels.every(p => p.contacted);
         const dateDisplay = type === 'past' ? `<span style="color:var(--danger); font-size:0.75rem;">Vencimento original: ${formatDate(item.parcels[0].dueDate)}</span>` : '';
-        return `<div class="notif-item"><div class="notif-info"><div>${item.clientName}</div><div>${isMultiple ? `${item.parcels.length} parcelas (Nº ${parcelNumbers})` : `Parc. ${parcelNumbers}`} • ${formatMoney(item.totalValue)}</div>${dateDisplay}</div><button class="btn-whatsapp ${item.phone?'':'disabled'}" onclick="handleZapClickGrouped('${item.phone}', '${item.clientName}', '${encodeURIComponent(JSON.stringify(item.parcels))}', ${item.totalValue}, '${type==='past'?'late':type}', '${item.firebaseId}', ${allContacted})">${allContacted?'✅':'📢'}</button></div>`;
+        return `<div class="notif-item">
+            <div class="notif-info"><div>${item.clientName}</div><div>${isMultiple ? `${item.parcels.length} parcelas (Nº ${parcelNumbers})` : `Parc. ${parcelNumbers}`} • ${formatMoney(item.totalValue)}</div>${dateDisplay}</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button class="action-btn" title="Ver Devedor" style="font-size:1.2rem;" onclick="closeNotificationModal(); goToClient('${item.firebaseId}')">🔍</button>
+                <button class="btn-whatsapp ${item.phone?'':'disabled'}" onclick="handleZapClickGrouped('${item.phone}', '${item.clientName}', '${encodeURIComponent(JSON.stringify(item.parcels))}', ${item.totalValue}, '${type==='past'?'late':type}', '${item.firebaseId}', ${allContacted})">${allContacted?'✅':'📢'}</button>
+            </div>
+        </div>`;
     }
+    
     function closeNotificationModal() { document.getElementById('notifModal').classList.remove('active'); }
 
     function handleZapClick(phone, name, parcelNum, value, dateString, msgType, firebaseId, parcelId, isContacted) {

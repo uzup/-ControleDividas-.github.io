@@ -1138,10 +1138,6 @@
             parcelLines = parcelData.map(p => `[Parcela ${p.number}]: vencimento em ${formatDate(p.dueDate)} - ${formatMoney(p.value)}`).join("\n");
         } else {
             parcelLines = `[${parcelasReal}]: vencimento em ${dataReal} - ${formatMoney(valorReal)}`;
-            if(msgType === 'auto') {
-                const t=new Date(); t.setHours(0,0,0,0); const d=new Date(parcelData.dueDate+'T00:00:00');
-                msgType = d.getTime()===t.getTime() ? 'today' : (d<t ? 'late' : 'tomorrow');
-            }
         }
 
         let templatePersonalizado = null;
@@ -1165,11 +1161,27 @@
                 .replace(/{forma de pagamento}/g, formaDePagamento);
             msg = intro; 
         } else {
+            const baseDateStr = isGrouped ? parcelData[0].dueDate : parcelData.dueDate;
+            const [dy, dm, dd] = baseDateStr.split('-');
+            const targetDate = new Date(dy, dm - 1, dd);
+            const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            
+            const diffTime = targetDate.getTime() - currentDate.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+            
             let introText = "";
-            if (msgType === 'today') introText = `Verificamos que a data do pagamento ${dataReal} é hoje.`;
-            else if (msgType === 'late') introText = `Verificamos que a data do pagamento ${dataReal} já passou.`;
-            else if (msgType === 'tomorrow') introText = `Verificamos que a data do pagamento ${dataReal} é amanhã.`;
-            else introText = `Verificamos que a data do pagamento é ${dataReal}.`;
+            if (diffDays < -1) {
+                introText = `Consta em nosso sistema que o pagamento previsto para ${dataReal} encontra-se pendente.`;
+            } else if (diffDays === -1) {
+                introText = `Gostaríamos de lembrar que o seu pagamento venceu ontem, dia ${dataReal}.`;
+            } else if (diffDays === 0) {
+                introText = `Passando para lembrar que o vencimento do seu pagamento é hoje, dia ${dataReal}.`;
+            } else if (diffDays === 1) {
+                introText = `Gostaríamos de lembrar que o seu pagamento vencerá amanhã, dia ${dataReal}.`;
+            } else {
+                introText = `Passando para informar antecipadamente que o seu pagamento vencerá no dia ${dataReal}.`;
+            }
 
             msg = `Olá ${name}!\n\n${introText}\n\n${parcelLines}\n\nO pagamento será realizado da seguinte forma:\n\n${formaDePagamento}\n\nPor favor, após realizar o pagamento, nos envie o comprovante.`;
         }

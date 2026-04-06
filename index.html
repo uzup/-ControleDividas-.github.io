@@ -25,9 +25,23 @@
         .auth-links{margin-top:15px;font-size:.85rem;color:var(--text-sec);}
         .auth-links a{color:var(--primary);text-decoration:none;font-weight:bold;cursor:pointer;}
         #app-container{display:none;padding:20px;max-width:900px;margin:0 auto;}
-        .nav-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px;}
-        .nav-btn{flex:1;min-width:60px;padding:12px 4px;border:none;background:#e5e7eb;color:var(--text-sec);font-size:.75rem;font-weight:700;border-radius:12px;cursor:pointer;transition:all .3s;}
-        .nav-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 6px -1px rgba(79,70,229,.4);}
+        .nav-bar{display:flex;align-items:center;gap:12px;margin-bottom:15px;background:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,.05);}
+        .grid-menu-btn{background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;transition:background .2s;display:flex;align-items:center;justify-content:center;}
+        .grid-menu-btn:hover{background:#f3f4f6;}
+        .grid-dots{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;}
+        .grid-dots span{display:block;width:5px;height:5px;border-radius:50%;background:var(--text-sec);transition:background .2s;}
+        .grid-menu-btn:hover .grid-dots span{background:var(--primary);}
+        .current-tab-label{font-size:1.1rem;font-weight:700;color:var(--text-main);display:flex;align-items:center;gap:8px;}
+        .grid-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.3);z-index:999;display:none;align-items:flex-start;justify-content:center;padding-top:80px;backdrop-filter:blur(2px);}
+        .grid-overlay.active{display:flex;animation:fadeIn .15s;}
+        .grid-popup{background:#fff;border-radius:16px;padding:20px;box-shadow:0 15px 40px rgba(0,0,0,.2);width:280px;animation:slideDown .2s ease-out;}
+        .grid-popup-title{font-size:.8rem;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:.5px;margin-bottom:15px;text-align:center;}
+        .grid-items{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+        .grid-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;cursor:pointer;transition:all .2s;border:2px solid transparent;background:#f9fafb;}
+        .grid-item:hover{background:#eef2ff;border-color:#c7d2fe;transform:translateY(-2px);}
+        .grid-item.active{background:#eef2ff;border-color:var(--primary);box-shadow:0 2px 8px rgba(79,70,229,.2);}
+        .grid-item-icon{font-size:1.6rem;line-height:1;}
+        .grid-item-label{font-size:.7rem;font-weight:700;color:var(--text-main);text-align:center;line-height:1.2;}
         .global-filter-container{margin-bottom:20px;}
         .global-filter-container select{width:100%;padding:15px;font-weight:bold;border-radius:12px;border:1px solid var(--primary);color:var(--primary);background:#fff;cursor:pointer;}
         .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,.05);flex-wrap:wrap;gap:15px;}
@@ -182,7 +196,7 @@
             body{padding:10px;}.top-bar{flex-direction:column;gap:10px;align-items:stretch;}.actions-box{justify-content:space-between;width:100%;}.btn-sys{flex:1;justify-content:center;}
             .installment-row{flex-direction:column;align-items:flex-start;gap:8px;padding:15px;}.home-lists-grid{grid-template-columns:1fr;}.dashboard-grid{grid-template-columns:repeat(2,1fr);}
             .calendar-grid{gap:2px;}.cal-day{min-height:50px;padding:2px;}.cal-badge{font-size:.6rem;padding:1px 4px;}.client-header{flex-direction:column;align-items:flex-start;}
-            .header-actions{width:100%;justify-content:flex-end;margin-top:10px;}.nav-btn{font-size:.68rem;min-width:48px;padding:10px 2px;}
+            .header-actions{width:100%;justify-content:flex-end;margin-top:10px;}
             .acordo-actions-grid{grid-template-columns:1fr;}.acordo-stage-bar{flex-direction:column;}
         }
     </style>
@@ -191,13 +205,24 @@
 <div id="auth-screen"><div class="login-card"><h1>Gestor Financeiro</h1><p id="auth-subtitle" style="color:#666;margin-bottom:20px;">Acesse sua conta &#9729;</p><input type="email" id="email" class="login-input" placeholder="Seu E-mail"><input type="password" id="password" class="login-input" placeholder="Sua Senha"><div id="authError" class="auth-error"></div><div id="authSuccess" class="auth-success"></div><button id="btnAction" class="btn-auth btn-login" onclick="handleAuthAction()">Entrar</button><div class="auth-links"><a href="#" id="linkForgotPassword" onclick="resetPassword()" style="display:block;margin-bottom:15px;">Esqueci minha senha</a><span id="toggleText">Não tem conta? </span><a href="#" id="linkToggleAuth" onclick="toggleAuthMode()">Criar conta</a></div></div></div>
 
 <div id="app-container" class="container">
-<div class="nav-tabs">
-    <button class="nav-btn active" onclick="switchView('home')" id="tab-home">&#127968; Início</button>
-    <button class="nav-btn" onclick="switchView('acordos')" id="tab-acordos">&#129309; Acordos</button>
-    <button class="nav-btn" onclick="switchView('clients')" id="tab-clients">&#128101; Devedores</button>
-    <button class="nav-btn" onclick="switchView('cobradores')" id="tab-cobradores">&#127970; Cobradores</button>
-    <button class="nav-btn" onclick="switchView('judiciario')" id="tab-judiciario">&#9878;&#65039; Judiciário</button>
-    <button class="nav-btn" onclick="switchView('agenda')" id="tab-agenda">&#128197; Agenda</button>
+<div class="nav-bar">
+    <button class="grid-menu-btn" onclick="toggleGridMenu()">
+        <div class="grid-dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    </button>
+    <div class="current-tab-label" id="currentTabLabel">&#127968; Início</div>
+</div>
+<div class="grid-overlay" id="gridOverlay" onclick="if(event.target===this)closeGridMenu()">
+    <div class="grid-popup">
+        <div class="grid-popup-title">Navegar</div>
+        <div class="grid-items">
+            <div class="grid-item active" id="tab-home" onclick="switchView('home')"><div class="grid-item-icon">&#127968;</div><div class="grid-item-label">Início</div></div>
+            <div class="grid-item" id="tab-acordos" onclick="switchView('acordos')"><div class="grid-item-icon">&#129309;</div><div class="grid-item-label">Acordos</div></div>
+            <div class="grid-item" id="tab-clients" onclick="switchView('clients')"><div class="grid-item-icon">&#128101;</div><div class="grid-item-label">Devedores</div></div>
+            <div class="grid-item" id="tab-cobradores" onclick="switchView('cobradores')"><div class="grid-item-icon">&#127970;</div><div class="grid-item-label">Cobradores</div></div>
+            <div class="grid-item" id="tab-judiciario" onclick="switchView('judiciario')"><div class="grid-item-icon">&#9878;&#65039;</div><div class="grid-item-label">Judiciário</div></div>
+            <div class="grid-item" id="tab-agenda" onclick="switchView('agenda')"><div class="grid-item-icon">&#128197;</div><div class="grid-item-label">Agenda</div></div>
+        </div>
+    </div>
 </div>
 <div class="global-filter-container"><select id="globalFilter" onchange="checkAndRenderAll()"><option value="ALL">&#128269; VISÃO GERAL</option></select></div>
 <div class="top-bar"><div class="search-box"><span class="search-icon">&#128269;</span><input type="text" id="searchBar" placeholder="Buscar..." onkeyup="handleSearchKeyup()"></div><div class="actions-box"><span id="userEmailDisplay" class="user-email"></span><button class="btn-sys" onclick="exportData()">&#11015; Salvar</button><button class="btn-sys" onclick="document.getElementById('fileInput').click()">&#11014; Restaurar</button><input type="file" id="fileInput" accept=".json" onchange="importData(this)"><button class="notification-btn" onclick="openNotificationModal()">&#128276;<span id="notifBadge" class="notification-badge hidden">0</span></button><button class="btn-logout" onclick="logout()">Sair</button></div></div>
@@ -333,7 +358,10 @@ db.ref('users/'+uid+'/acordos').on('value',function(s){var d=s.val();acordos=d?O
 db.ref('users/'+uid+'/judiciarios').on('value',function(s){var d=s.val();judiciarios=d?Object.keys(d).map(function(k){return Object.assign({},d[k],{firebaseId:k});}):[];checkAndRenderAll();});}
 function checkAndRenderAll(){document.getElementById('loadingMsg').style.display='none';renderHome();renderCobradores();renderClients();renderAgenda();renderAcordos();renderJudiciario();updateNotifications();}
 
-function switchView(v){document.querySelectorAll('.view-section').forEach(function(e){e.classList.remove('active');});document.querySelectorAll('.nav-btn').forEach(function(e){e.classList.remove('active');});document.getElementById('view-'+v).classList.add('active');document.getElementById('tab-'+v).classList.add('active');calCurrentDate=new Date();agendaDateFilter=null;clients.forEach(function(c){if(c.isExpanded){c.isExpanded=false;updateCloud(c);}});cobradores.forEach(function(c){if(c.isExpanded)db.ref(uRef('cobradores/'+c.firebaseId)).update({isExpanded:false});});acordos.forEach(function(a){if(a.isExpanded){a.isExpanded=false;db.ref(uRef('acordos/'+a.firebaseId)).update({isExpanded:false});}});judiciarios.forEach(function(j){if(j.isExpanded){j.isExpanded=false;db.ref(uRef('judiciarios/'+j.firebaseId)).update({isExpanded:false});}});checkAndRenderAll();}
+var tabLabels={home:'&#127968; Início',acordos:'&#129309; Acordos',clients:'&#128101; Devedores',cobradores:'&#127970; Cobradores',judiciario:'&#9878;&#65039; Judiciário',agenda:'&#128197; Agenda'};
+function toggleGridMenu(){document.getElementById('gridOverlay').classList.toggle('active');}
+function closeGridMenu(){document.getElementById('gridOverlay').classList.remove('active');}
+function switchView(v){closeGridMenu();document.querySelectorAll('.view-section').forEach(function(e){e.classList.remove('active');});document.querySelectorAll('.grid-item').forEach(function(e){e.classList.remove('active');});document.getElementById('view-'+v).classList.add('active');document.getElementById('tab-'+v).classList.add('active');document.getElementById('currentTabLabel').innerHTML=tabLabels[v]||v;calCurrentDate=new Date();agendaDateFilter=null;clients.forEach(function(c){if(c.isExpanded){c.isExpanded=false;updateCloud(c);}});cobradores.forEach(function(c){if(c.isExpanded)db.ref(uRef('cobradores/'+c.firebaseId)).update({isExpanded:false});});acordos.forEach(function(a){if(a.isExpanded){a.isExpanded=false;db.ref(uRef('acordos/'+a.firebaseId)).update({isExpanded:false});}});judiciarios.forEach(function(j){if(j.isExpanded){j.isExpanded=false;db.ref(uRef('judiciarios/'+j.firebaseId)).update({isExpanded:false});}});checkAndRenderAll();}
 
 function goToClient(fid){document.getElementById('searchBar').value='';var t=clients.find(function(x){return x.firebaseId===fid;});if(t){clients.forEach(function(c){if(c.firebaseId!==fid&&c.isExpanded){c.isExpanded=false;updateCloud(c);}});if(!t.isExpanded){t.isExpanded=true;updateCloud(t);}}switchView('clients');setTimeout(function(){var el=document.getElementById('client-card-'+fid);if(el){window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});el.style.transition="box-shadow 0.3s";el.style.boxShadow="0 0 15px var(--primary)";setTimeout(function(){el.style.boxShadow="";},2000);}},300);}
 

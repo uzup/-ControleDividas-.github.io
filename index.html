@@ -190,8 +190,19 @@
         .acordo-info-row:last-child{border-bottom:none;}
         .acordo-info-label{color:var(--text-sec);font-weight:600;}
         .acordo-info-value{color:var(--text-main);font-weight:700;}
-        .btn-report{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.85rem;margin-top:15px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+        .btn-report{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.85rem;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:8px;flex:1;}
         .btn-report:hover{background:#bfdbfe;}
+        .report-bar{display:flex;gap:8px;margin-top:15px;align-items:center;}
+        .btn-report-edit{background:#f3f4f6;color:var(--text-sec);border:1px solid var(--border);padding:10px 14px;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;}
+        .btn-report-edit:hover{background:#e5e7eb;color:var(--primary);border-color:var(--primary);}
+        .report-settings{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:15px;margin-top:10px;display:none;animation:slideDown .2s;}
+        .report-settings.open{display:block;}
+        .report-settings .form-group{margin-bottom:10px;}
+        .report-settings label{font-size:.75rem;}
+        .color-options{display:flex;gap:8px;flex-wrap:wrap;}
+        .color-opt{width:32px;height:32px;border-radius:8px;border:3px solid transparent;cursor:pointer;transition:all .2s;}
+        .color-opt:hover{transform:scale(1.15);}
+        .color-opt.selected{border-color:var(--text-main);box-shadow:0 2px 6px rgba(0,0,0,.2);}
         @media(max-width:768px){
             body{padding:10px;}.top-bar{flex-direction:column;gap:10px;align-items:stretch;}.actions-box{justify-content:space-between;width:100%;}.btn-sys{flex:1;justify-content:center;}
             .installment-row{flex-direction:column;align-items:flex-start;gap:8px;padding:15px;}.home-lists-grid{grid-template-columns:1fr;}.dashboard-grid{grid-template-columns:repeat(2,1fr);}
@@ -376,10 +387,19 @@ function saveCobradorEdit(){if(!editCobId)return;db.ref(uRef('cobradores/'+editC
 function deleteCobrador(e,fid){e.stopPropagation();if(!confirm("Excluir cobrador?"))return;db.ref(uRef('cobradores/'+fid)).remove();}
 function toggleCobradorCard(fid){var t=cobradores.find(function(x){return x.firebaseId===fid;});if(t){cobradores.forEach(function(c){if(c.firebaseId!==fid&&c.isExpanded)db.ref(uRef('cobradores/'+c.firebaseId)).update({isExpanded:false});});db.ref(uRef('cobradores/'+fid)).update({isExpanded:!t.isExpanded});}}
 
+var reportColors={};
+function toggleReportSettings(fid){var el=document.getElementById('reportSettings-'+fid);el.classList.toggle('open');}
+function selectReportColor(fid,el,rgb){var container=el.parentElement;container.querySelectorAll('.color-opt').forEach(function(o){o.classList.remove('selected');});el.classList.add('selected');reportColors[fid]=rgb;}
+
 function generateReport(cobFid){
 try{
 var cob=cobradores.find(function(c){return c.firebaseId===cobFid;});if(!cob)return;
-var autorNome=prompt("Seu nome (quem está gerando o relatório):","");if(!autorNome)return;
+var titleInput=document.getElementById('reportTitle-'+cobFid);
+var authorInput=document.getElementById('reportAuthor-'+cobFid);
+var reportTitle=titleInput&&titleInput.value.trim()?titleInput.value.trim():'Relatório';
+var autorNome=authorInput?authorInput.value.trim():'';
+var colorRgb=reportColors[cobFid]||'79,70,229';
+var cp=colorRgb.split(',').map(Number);
 var cobClients=clients.filter(function(c){return(c.cobradorId||'')===cobFid;});
 var cobAcordos=acordos.filter(function(a){return(a.cobradorId||'')===cobFid;});
 var cobJud=judiciarios.filter(function(j){return(j.cobradorId||'')===cobFid;});
@@ -388,26 +408,29 @@ if(!window.jspdf||!window.jspdf.jsPDF){alert('Biblioteca PDF não carregou. Veri
 var jsPDF=window.jspdf.jsPDF;var doc=new jsPDF();
 
 // === CAPA ===
-doc.setFillColor(79,70,229);doc.rect(0,0,210,297,'F');
+doc.setFillColor(cp[0],cp[1],cp[2]);doc.rect(0,0,210,297,'F');
 doc.setFillColor(255,255,255);doc.roundedRect(20,40,170,200,8,8,'F');
-doc.setTextColor(79,70,229);doc.setFontSize(28);doc.setFont(undefined,'bold');
-doc.text('RELATÓRIO DE',105,80,{align:'center'});doc.text('COBRANÇA',105,95,{align:'center'});
-doc.setDrawColor(79,70,229);doc.setLineWidth(1);doc.line(50,105,160,105);
-doc.setFontSize(16);doc.setFont(undefined,'bold');doc.setTextColor(79,70,229);
+doc.setTextColor(cp[0],cp[1],cp[2]);doc.setFontSize(28);doc.setFont(undefined,'bold');
+var titleLines=doc.splitTextToSize(reportTitle.toUpperCase(),140);
+var titleY=80;
+titleLines.forEach(function(line,i){doc.text(line,105,titleY+(i*14),{align:'center'});});
+var afterTitleY=titleY+(titleLines.length*14)+5;
+doc.setDrawColor(cp[0],cp[1],cp[2]);doc.setLineWidth(1);doc.line(50,afterTitleY,160,afterTitleY);
+doc.setFontSize(16);doc.setFont(undefined,'bold');doc.setTextColor(cp[0],cp[1],cp[2]);
 var nameLines=doc.splitTextToSize(cob.name,120);
-var nameStartY=130-(nameLines.length-1)*4;
+var nameStartY=afterTitleY+20;
 nameLines.forEach(function(line,i){doc.text(line,105,nameStartY+(i*10),{align:'center'});});
+var infoY=nameStartY+(nameLines.length*10)+15;
 doc.setTextColor(100,100,100);doc.setFontSize(12);doc.setFont(undefined,'normal');
-var autorLines=doc.splitTextToSize('Elaborado por: '+autorNome,130);
-autorLines.forEach(function(line,i){doc.text(line,105,165+(i*8),{align:'center'});});
-doc.text('Data: '+todayStr,105,178+(autorLines.length>1?(autorLines.length-1)*8:0),{align:'center'});
+if(autorNome){var autorLines=doc.splitTextToSize('Elaborado por: '+autorNome,130);autorLines.forEach(function(line,i){doc.text(line,105,infoY+(i*8),{align:'center'});});infoY+=autorLines.length*8+5;}
+doc.text('Data: '+todayStr,105,infoY,{align:'center'});
 var totalAcordos=cobClients.length;var totalJud=cobJud.length;var totalNegociando=cobAcordos.length;
 doc.setFontSize(10);doc.setTextColor(120,120,120);
-doc.text(totalAcordos+' acordo(s) firmado(s)  |  '+totalNegociando+' em negociação  |  '+totalJud+' ação(ões) judicial(is)',105,200,{align:'center'});
+doc.text(totalAcordos+' acordo(s) firmado(s)  |  '+totalNegociando+' em negociação  |  '+totalJud+' ação(ões) judicial(is)',105,220,{align:'center'});
 
 // === PÁGINA 2: ACORDOS FIRMADOS ===
 doc.addPage();doc.setTextColor(0,0,0);
-doc.setFillColor(79,70,229);doc.rect(0,0,210,18,'F');
+doc.setFillColor(cp[0],cp[1],cp[2]);doc.rect(0,0,210,18,'F');
 doc.setTextColor(255,255,255);doc.setFontSize(14);doc.setFont(undefined,'bold');
 doc.text('ACORDOS FIRMADOS',105,12,{align:'center'});
 doc.setTextColor(0,0,0);
@@ -420,7 +443,7 @@ var rm=tp-pp;var fn=cl.feeName||'Honorários';
 var statusTxt=ov>0?'EM ATRASO ('+ov+')':'EM DIA';
 return[cl.name,formatMoney(cl.totalDebt),tp+' parcelas',pp+' pagas / '+rm+' restantes',statusTxt,fn+': '+formatMoney(cl.fees)+(cl.feesPaid?' (Pago)':' (Pendente)')];
 });
-doc.autoTable({startY:24,head:[['Devedor','Dívida Total','Parcelas','Progresso','Situação','Taxa Extra']],body:acordoData,theme:'grid',styles:{fontSize:8,cellPadding:3,valign:'middle'},headStyles:{fillColor:[79,70,229],textColor:[255,255,255],fontStyle:'bold'},columnStyles:{0:{fontStyle:'bold',cellWidth:32},4:{fontStyle:'bold'}},
+doc.autoTable({startY:24,head:[['Devedor','Dívida Total','Parcelas','Progresso','Situação','Taxa Extra']],body:acordoData,theme:'grid',styles:{fontSize:8,cellPadding:3,valign:'middle'},headStyles:{fillColor:[cp[0],cp[1],cp[2]],textColor:[255,255,255],fontStyle:'bold'},columnStyles:{0:{fontStyle:'bold',cellWidth:32},4:{fontStyle:'bold'}},
 didParseCell:function(data){if(data.column.index===4&&data.section==='body'){if(data.cell.raw.indexOf('ATRASO')>=0)data.cell.styles.textColor=[220,38,38];else data.cell.styles.textColor=[22,163,74];}}
 });}
 
@@ -452,7 +475,7 @@ var judData=cobJud.map(function(j){return[j.name,formatMoney(j.totalDebt),j.acti
 doc.autoTable({startY:24,head:[['Devedor','Dívida','Tipo de Ação','Observações']],body:judData,theme:'grid',styles:{fontSize:8,cellPadding:3},headStyles:{fillColor:[220,38,38],textColor:[255,255,255],fontStyle:'bold'},columnStyles:{0:{fontStyle:'bold',cellWidth:32}}
 });}
 
-// === RODAPÉ EM TODAS AS PÁGINAS ===
+// === RODAPÉ ===
 var totalPages=doc.internal.getNumberOfPages();
 for(var i=1;i<=totalPages;i++){doc.setPage(i);doc.setFontSize(8);doc.setTextColor(150,150,150);doc.setFont(undefined,'normal');if(i>1)doc.text('Relatório '+cob.name+' - '+todayStr+' - Pág. '+i+'/'+totalPages,105,290,{align:'center'});}
 
@@ -466,7 +489,7 @@ setTimeout(function(){document.body.removeChild(link);URL.revokeObjectURL(blobUr
 }catch(err){alert('Erro ao gerar PDF: '+err.message);console.error(err);}
 }
 
-function renderCobradores(){var l=document.getElementById('cobradoresList');if(cobradores.length===0){l.innerHTML='<div style="text-align:center;padding:30px;color:#666;">Nenhum cobrador.</div>';return;}l.innerHTML=cobradores.map(function(c){var cc=clients.filter(function(cl){return(cl.cobradorId||'')===c.firebaseId;}).length;return'<div class="card client-card '+(c.isExpanded?'is-open':'')+'"><div class="client-header" onclick="toggleCobradorCard(\''+esc(c.firebaseId)+'\')"><div class="header-info"><h2>&#127970; '+esc(c.name)+'</h2><div class="parcel-text-info"><span>'+cc+' devedor(es)</span></div></div><div class="header-actions"><button class="icon-btn" onclick="openEditCobModal(event,\''+esc(c.firebaseId)+'\')">&#9998;</button><button class="icon-btn trash" onclick="deleteCobrador(event,\''+esc(c.firebaseId)+'\')">&#128465;</button><span class="chevron">&#9660;</span></div></div><div class="client-body"><div style="margin-top:5px;"><strong style="font-size:.85rem;color:var(--text-sec);">DADOS PAGAMENTO:</strong><pre style="background:#f9fafb;padding:10px;border-radius:8px;margin-top:5px;border:1px solid var(--border);white-space:pre-wrap;font-family:inherit;">'+esc(c.paymentInfo||'Nenhum')+'</pre></div><div style="margin-top:10px;"><strong style="font-size:.85rem;color:var(--text-sec);">TEMPLATE COBRANÇA:</strong><pre style="background:#fef2f2;padding:10px;border-radius:8px;margin-top:5px;border:1px solid #fca5a5;white-space:pre-wrap;font-family:inherit;">'+esc(c.msgTemplate||'Padrão')+'</pre></div><button class="btn-report" onclick="generateReport(\''+esc(c.firebaseId)+'\')">&#128202; Gerar Relatório PDF</button></div></div>';}).join('');}
+function renderCobradores(){var l=document.getElementById('cobradoresList');if(cobradores.length===0){l.innerHTML='<div style="text-align:center;padding:30px;color:#666;">Nenhum cobrador.</div>';return;}l.innerHTML=cobradores.map(function(c){var cc=clients.filter(function(cl){return(cl.cobradorId||'')===c.firebaseId;}).length;var fid=esc(c.firebaseId);return'<div class="card client-card '+(c.isExpanded?'is-open':'')+'"><div class="client-header" onclick="toggleCobradorCard(\''+fid+'\')"><div class="header-info"><h2>&#127970; '+esc(c.name)+'</h2><div class="parcel-text-info"><span>'+cc+' devedor(es)</span></div></div><div class="header-actions"><button class="icon-btn" onclick="openEditCobModal(event,\''+fid+'\')">&#9998;</button><button class="icon-btn trash" onclick="deleteCobrador(event,\''+fid+'\')">&#128465;</button><span class="chevron">&#9660;</span></div></div><div class="client-body"><div style="margin-top:5px;"><strong style="font-size:.85rem;color:var(--text-sec);">DADOS PAGAMENTO:</strong><pre style="background:#f9fafb;padding:10px;border-radius:8px;margin-top:5px;border:1px solid var(--border);white-space:pre-wrap;font-family:inherit;">'+esc(c.paymentInfo||'Nenhum')+'</pre></div><div style="margin-top:10px;"><strong style="font-size:.85rem;color:var(--text-sec);">TEMPLATE COBRANÇA:</strong><pre style="background:#fef2f2;padding:10px;border-radius:8px;margin-top:5px;border:1px solid #fca5a5;white-space:pre-wrap;font-family:inherit;">'+esc(c.msgTemplate||'Padrão')+'</pre></div><div class="report-bar"><button class="btn-report" onclick="generateReport(\''+fid+'\')">&#128202; Gerar Relatório PDF</button><button class="btn-report-edit" onclick="toggleReportSettings(\''+fid+'\')" title="Personalizar relatório">&#9998;</button></div><div class="report-settings" id="reportSettings-'+fid+'"><div class="form-group"><label>Cor do Relatório</label><div class="color-options"><div class="color-opt selected" style="background:#4f46e5;" onclick="selectReportColor(\''+fid+'\',this,\'79,70,229\')" data-rgb="79,70,229"></div><div class="color-opt" style="background:#dc2626;" onclick="selectReportColor(\''+fid+'\',this,\'220,38,38\')" data-rgb="220,38,38"></div><div class="color-opt" style="background:#16a34a;" onclick="selectReportColor(\''+fid+'\',this,\'22,163,74\')" data-rgb="22,163,74"></div><div class="color-opt" style="background:#d97706;" onclick="selectReportColor(\''+fid+'\',this,\'217,119,6\')" data-rgb="217,119,6"></div><div class="color-opt" style="background:#7c3aed;" onclick="selectReportColor(\''+fid+'\',this,\'124,58,237\')" data-rgb="124,58,237"></div><div class="color-opt" style="background:#0891b2;" onclick="selectReportColor(\''+fid+'\',this,\'8,145,178\')" data-rgb="8,145,178"></div><div class="color-opt" style="background:#be185d;" onclick="selectReportColor(\''+fid+'\',this,\'190,24,93\')" data-rgb="190,24,93"></div><div class="color-opt" style="background:#1e293b;" onclick="selectReportColor(\''+fid+'\',this,\'30,41,59\')" data-rgb="30,41,59"></div></div></div><div class="form-group"><label>Título do Relatório</label><input type="text" id="reportTitle-'+fid+'" placeholder="Relatório de Cobrança" style="padding:8px;font-size:.9rem;"></div><div class="form-group"><label>Elaborado por (deixe vazio para não exibir)</label><input type="text" id="reportAuthor-'+fid+'" placeholder="Seu nome" style="padding:8px;font-size:.9rem;"></div></div></div></div>';}).join('');}
 
 // CLIENTES
 function addInstallmentGroup(){var q=parseInt(document.getElementById('tempQtd').value),v=parseFloat(document.getElementById('tempVal').value);if(!q||!v){alert("Inválido");return;}tempGroups.push({qtd:q,value:v});updatePreview();document.getElementById('tempQtd').value='';document.getElementById('tempVal').value='';}

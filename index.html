@@ -173,6 +173,8 @@
         .cal-badge.past{background:var(--danger);}.cal-badge.future{background:var(--warning);}
         .clear-filter-btn{display:none;width:100%;padding:10px;background:#eef2ff;color:var(--primary);border:1px dashed var(--primary);border-radius:8px;margin-bottom:15px;font-weight:bold;cursor:pointer;}
         .clear-filter-btn.active{display:block;}
+        .btn-calendar-export{width:100%;padding:12px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:8px;font-weight:600;cursor:pointer;font-size:.85rem;margin-bottom:15px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+        .btn-calendar-export:hover{background:#dcfce7;}
         .acordo-stage-bar{display:flex;gap:0;margin:15px 0;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
         .stage-step{flex:1;padding:10px 8px;text-align:center;font-size:.75rem;font-weight:700;background:#f3f4f6;color:var(--text-sec);transition:all .3s;}
         .stage-step.active{background:var(--acordo);color:#fff;}
@@ -336,6 +338,7 @@
 <div id="view-agenda" class="view-section">
     <div class="card" style="padding:15px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;"><button class="btn-small btn-cal-nav" onclick="changeCalMonth(-1)">&#9664; Ant.</button><h3 id="calMonthLabel" style="margin:0;color:var(--primary);">Mês</h3><button class="btn-small btn-cal-nav" onclick="changeCalMonth(1)">Próx. &#9654;</button></div><div id="calendarGrid" class="calendar-grid"></div></div>
     <button id="clearAgendaFilterBtn" class="clear-filter-btn" onclick="clearAgendaDateFilter()">Exibir Todas</button>
+    <button class="btn-calendar-export" onclick="exportToCalendar()">&#128197; Exportar cobranças para Agenda do Celular</button>
     <div id="agendaList"></div>
 </div>
 </div>
@@ -542,10 +545,11 @@ function saveAcordoEdit(){if(!editAcordoId)return;var a=acordos.find(function(x)
 
 function getAcordoMsg(cob,type,name,debt,cobNome){var val=formatMoney(debt);if(cob){var custom='';if(type==='intro')custom=cob.msgIntro||'';else if(type==='sem_resp_1')custom=cob.msgSemResp1||'';else if(type==='negociacao')custom=cob.msgNegociacao||'';else if(type==='sem_resp_2')custom=cob.msgSemResp2||'';else if(type==='assinatura')custom=cob.msgAssinatura||'';if(custom)return custom.replace(/{nome}/g,name).replace(/{valor}/g,val).replace(/{cobrador}/g,cobNome);}
 if(type==='intro')return'Prezado(a) '+name+',\n\nAqui é da '+cobNome+'.\n\nEstamos entrando em contato referente ao débito de '+val+' em seu nome.\n\nGostaríamos de oferecer a possibilidade de regularização de forma amigável, através de um acordo viável para ambas as partes.\n\nPor favor, entre em contato para conversarmos.\n\nAtenciosamente,\n'+cobNome;
-if(type==='sem_resp_1')return'Prezado(a) '+name+',\n\nEntramos em contato anteriormente sobre o débito de '+val+', porém não obtivemos retorno.\n\nInformamos que, caso não haja manifestação de interesse em realizar o acordo, será necessário proceder para vias judiciais.\n\nAguardamos seu retorno.';
+if(type==='sem_resp_1')return'Prezado(a) '+name+',\n\nEntramos em contato anteriormente sobre o débito de '+val+', porém não obtivemos retorno.\n\nInformamos que, caso não haja manifestação de interesse em realizar o acordo, será necessário proceder para outras vias de cobrança.\n\nAguardamos seu retorno.';
 if(type==='negociacao')return'Prezado(a) '+name+',\n\nReferente ao débito de '+val+', informamos que é necessário a formalização do acordo em até *10 dias úteis*.\n\nApós este prazo, será necessário buscar outras vias.\n\nEstamos à disposição.';
-if(type==='sem_resp_2')return'Prezado(a) '+name+',\n\nAguardamos o fechamento do acordo referente ao débito de '+val+'.\n\nCaso não obtenhamos retorno, será necessário proceder para vias judiciais.';
-if(type==='assinatura')return'Prezado(a) '+name+',\n\nO acordo referente ao débito de '+val+' foi formalizado!\n\nPara validade, é *necessário que você assine o documento* e nos encaminhe de volta.\n\n*Opções:*\n\n *Digital:* Pelo app *gov.br* no local marcado.\n\n *Manual:* Assine *todas as folhas* e encaminhe *tudo digitalizado*
+if(type==='sem_resp_2')return'Prezado(a) '+name+',\n\nAguardamos o fechamento do acordo referente ao débito de '+val+'.\n\nCaso não obtenhamos retorno, será necessário proceder para outras vias de cobrança.';
+if(type==='assinatura')return'Prezado(a) '+name+',\n\nO acordo referente ao débito de '+val+' foi formalizado!\n\nPara validade, é *necessário que você assine o documento* e nos encaminhe de volta.\n\n*Opções:*\n\n📱 *Digital:* Pelo app *gov.br* no local marcado.\n\n✍️ *Manual:* Assine *todas as folhas* e encaminhe *tudo digitalizado* (foto ou scan).\n\nApós assinar, envie por aqui.';return'';}
+
 function sendAcordoMessage(fid,type){var a=acordos.find(function(x){return x.firebaseId===fid;});if(!a)return;if(!a.phone)return alert("Sem telefone.");var cp=a.phone.replace(/\D/g,'');var cob=cobradores.find(function(c){return c.firebaseId===a.cobradorId;});var cn=cob?cob.name:'Assessoria';var msg=getAcordoMsg(cob,type,a.name,a.totalDebt,cn);if(!msg)return;if(type==='intro')a.introSent=true;else if(type==='sem_resp_1')a.semResp1Sent=true;else if(type==='negociacao')a.negociacaoSent=true;else if(type==='sem_resp_2')a.semResp2Sent=true;else if(type==='assinatura')a.assinaturaSent=true;updateAcordoCloud(a);window.open('https://wa.me/55'+cp+'?text='+encodeURIComponent(msg),'_blank');}
 
 var transferAcordoId=null;var transferSource=null;
@@ -597,6 +601,36 @@ fil.forEach(function(c){var paid=c.installments.reduce(function(a,b){return b.pa
 l.innerHTML+='<div id="client-card-'+esc(c.firebaseId)+'" class="card client-card status-'+st+' '+(c.isExpanded?'is-open':'')+'"><div class="client-header" onclick="toggleCard(\''+esc(c.firebaseId)+'\')"><div class="header-info"><h2>'+esc(c.name)+' '+ui+'</h2><div class="parcel-text-info"><span>Total: <b>'+tp2+'</b></span><span>Pagas: <b>'+pp+'</b></span><span>Pend: <b>'+(tp2-pp)+'</b></span></div></div><div class="header-actions">'+sl+'<button class="icon-btn" onclick="openEditClientModal(event,\''+esc(c.firebaseId)+'\')">✎</button><button class="icon-btn trash" onclick="deleteClient(event,\''+esc(c.firebaseId)+'\')">🗑</button><span class="chevron">▼</span></div></div><div class="client-body"><div class="progress-container"><div class="progress-labels"><span>'+pct.toFixed(0)+'%</span><span>Falta: '+formatMoney(rem)+'</span></div><div class="progress-track"><div class="progress-fill '+(pct>=99.9?'full':'')+'" style="width:'+pct+'%"></div></div></div><div class="stats-grid"><div class="stat-item"><strong>Total</strong><div>'+formatMoney(c.totalDebt)+'</div></div><div class="stat-item"><strong>Pago</strong><div style="color:var(--success)">'+formatMoney(paid)+'</div></div><div class="stat-item"><strong>Falta</strong><div>'+formatMoney(rem)+'</div></div></div><div style="background:#eff6ff;padding:12px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:600;color:#1e3a8a;">'+esc(fn)+': '+formatMoney(c.fees)+' <button class="action-btn" style="font-size:.8rem" onclick="editFeeName(\''+esc(c.firebaseId)+'\')">✎</button></span><label style="cursor:pointer;display:flex;align-items:center;"><input type="checkbox" class="custom-checkbox" '+(c.feesPaid?'checked':'')+' onchange="toggleFee(\''+esc(c.firebaseId)+'\')"><span style="margin-left:8px;color:#1e3a8a;">'+(c.feesPaid?'Recebido':'Pendente')+'</span></label></div><div class="installment-list">'+c.installments.map(function(p){var ist=checkStatus(p.dueDate),tag=p.paid?'<span class="tag tag-success">OK</span>':(ist==='atrasado'?'<span class="tag tag-danger">Vencido</span>':'<span class="tag tag-warning">Aberto</span>');return'<div class="installment-row" style="'+(p.paid?'opacity:.6':'')+'"><div class="chk-group"><input type="checkbox" class="custom-checkbox" '+(p.paid?'checked':'')+' onchange="toggleInstallment(\''+esc(c.firebaseId)+'\','+p.id+')"><div><div style="font-weight:600;">Parc. '+p.number+'</div><div class="inst-date">'+formatDate(p.dueDate)+'</div></div></div><div style="display:flex;align-items:center;">'+(!p.paid?'<button class="btn-whatsapp '+(c.phone?'':'disabled')+'" onclick="handleZapClick(\''+esc(c.phone)+'\',\''+esc(c.name)+'\','+p.number+','+p.value+',\''+p.dueDate+'\',\'auto\',\''+esc(c.firebaseId)+'\','+p.id+','+(p.contacted?'true':'false')+')">'+(p.contacted?'✅':'📱')+'</button>':'')+'<div style="text-align:right;margin-left:10px;"><div class="val-group"><span class="inst-val">'+formatMoney(p.value)+'</span><button class="action-btn" onclick="editInstallmentDate(\''+esc(c.firebaseId)+'\','+p.id+')">📅</button><button class="action-btn btn-note '+(p.note?'has-note':'')+'" onclick="editNote(\''+esc(c.firebaseId)+'\','+p.id+')">📝</button><button class="action-btn" onclick="editInstallmentValue(\''+esc(c.firebaseId)+'\','+p.id+')">✎</button><button class="action-btn" onclick="deleteInstallment(\''+esc(c.firebaseId)+'\','+p.id+')">✕</button></div><div>'+tag+'</div></div></div></div>';}).join('')+'<button class="btn-add-more" onclick="addMoreParcels(\''+esc(c.firebaseId)+'\')">+ Parcelas</button></div></div></div>';});}
 
 // AGENDA
+function exportToCalendar(){
+var fv=document.getElementById('globalFilter').value;
+var tc=fv!=='ALL'?clients.filter(function(c){return(c.cobradorId||'')===fv;}):clients;
+var events=[];
+tc.forEach(function(cl){cl.installments.forEach(function(inst){
+if(!inst.paid){events.push({name:cl.name,number:inst.number,value:inst.value,dueDate:inst.dueDate});}
+});});
+if(events.length===0){alert('Nenhuma cobrança pendente para exportar.');return;}
+var cal='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//GestorFinanceiro//PT\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n';
+events.forEach(function(ev){
+var p=ev.dueDate.split('-');
+var dateStr=p[0]+p[1]+p[2];
+var uid='gf-'+ev.dueDate+'-'+ev.number+'-'+Math.random().toString(36).substr(2,6);
+cal+='BEGIN:VEVENT\r\n';
+cal+='DTSTART;VALUE=DATE:'+dateStr+'\r\n';
+cal+='DTEND;VALUE=DATE:'+dateStr+'\r\n';
+cal+='SUMMARY:Cobrança: '+ev.name+' - Parc. '+ev.number+'\r\n';
+cal+='DESCRIPTION:Devedor: '+ev.name+'\\nParcela '+ev.number+': '+formatMoney(ev.value).replace('R$','R\\$')+'\\nVencimento: '+formatDate(ev.dueDate)+'\r\n';
+cal+='BEGIN:VALARM\r\nTRIGGER:-P1D\r\nACTION:DISPLAY\r\nDESCRIPTION:Cobrança amanhã: '+ev.name+'\r\nEND:VALARM\r\n';
+cal+='BEGIN:VALARM\r\nTRIGGER:PT0M\r\nACTION:DISPLAY\r\nDESCRIPTION:Cobrança hoje: '+ev.name+'\r\nEND:VALARM\r\n';
+cal+='UID:'+uid+'\r\n';
+cal+='END:VEVENT\r\n';
+});
+cal+='END:VCALENDAR\r\n';
+var blob=new Blob([cal],{type:'text/calendar;charset=utf-8'});
+var url=URL.createObjectURL(blob);
+var link=document.createElement('a');link.href=url;link.download='cobrancas.ics';link.target='_blank';
+document.body.appendChild(link);link.click();
+setTimeout(function(){document.body.removeChild(link);URL.revokeObjectURL(url);},1000);
+alert(events.length+' cobrança(s) exportadas! Abra o arquivo no celular para adicionar à sua agenda.');}
 function changeCalMonth(o){calCurrentDate.setMonth(calCurrentDate.getMonth()+o);agendaDateFilter=null;renderAgenda();}
 function filterAgendaByDate(d){agendaDateFilter=d;renderAgenda();}
 function clearAgendaDateFilter(){agendaDateFilter=null;renderAgenda();}

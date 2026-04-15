@@ -576,7 +576,20 @@ try{var raw=atob(model.docxBase64);var arr=new Uint8Array(raw.length);for(var i=
 var zip=new PizZip(arr);var doc=new window.docxtemplater(zip,{paragraphLoop:true,linebreaks:true,nullGetter:function(){return'';}});
 doc.render({QUALIFICACAO:document.getElementById('genQualificacao').value||'',NOME_DEVEDOR:document.getElementById('genNomeDevedor').value||'',CPF_DEVEDOR:document.getElementById('genCpfDevedor').value||'',MOTIVO_DIVIDA:document.getElementById('genMotivoDivida').value||'',VALOR_DIVIDA_BRUTA:formatMoney(parseFloat(document.getElementById('genValorDividaBruta').value)||0),VALOR_HONORARIOS:formatMoney(parseFloat(document.getElementById('genValorHonorarios').value)||0),VALOR_TOTAL:document.getElementById('genValorTotal').value||formatMoney(0),METODO_PAGAMENTO:document.getElementById('genMetodoPagamento').value||'',DATA_ACORDO:document.getElementById('genDataAcordo').value?formatDate(document.getElementById('genDataAcordo').value):new Date().toLocaleDateString('pt-BR'),DATA_VENCIMENTO:document.getElementById('genDataVencimento').value?formatDate(document.getElementById('genDataVencimento').value):'',NOME_COBRADOR:cob?cob.name:''});
 var out=doc.getZip().generate({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-var url=URL.createObjectURL(out);var link=document.createElement('a');link.href=url;link.download='acordo_'+(document.getElementById('genNomeDevedor').value||'devedor').replace(/\s/g,'_')+'.docx';link.target='_blank';document.body.appendChild(link);link.click();setTimeout(function(){document.body.removeChild(link);URL.revokeObjectURL(url);},1000);closeModal('genAcordoModal');}catch(e){alert('Erro: '+e.message);console.error(e);}}
+var url=URL.createObjectURL(out);var link=document.createElement('a');link.href=url;link.download='acordo_'+(document.getElementById('genNomeDevedor').value||'devedor').replace(/\s/g,'_')+'.docx';link.target='_blank';document.body.appendChild(link);link.click();setTimeout(function(){document.body.removeChild(link);URL.revokeObjectURL(url);},1000);closeModal('genAcordoModal');} catch(e) {
+    if (e.properties && e.properties.errors instanceof Array) {
+        // Pega as explicações detalhadas de cada erro dentro do template
+        var errorMessages = e.properties.errors.map(function(err) { 
+            return err.properties.explanation || err.message; 
+        }).join("\n");
+        alert('Erro no Modelo do Word:\n' + errorMessages);
+        console.error('Erros detalhados do docxtemplater:', e.properties.errors);
+    } else {
+        alert('Erro ao gerar documento: ' + e.message);
+        console.error(e);
+    }
+}
+}
 
 // === IA BATCH IMPROVE ===
 function openAIImprovePanel(mode){var el=document.getElementById('aiImprovePanel-'+mode);el.style.display=el.style.display==='none'?'block':'none';}

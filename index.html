@@ -91,11 +91,11 @@
         .remove-link{color:var(--danger);cursor:pointer;font-weight:600;font-size:.8rem;}
         .total-badge{display:block;text-align:right;margin-top:10px;font-weight:700;color:var(--primary);}
         .client-card{border-left:5px solid var(--border);transition:all .3s ease;}
-        .client-card.status-pago{border-left-color:var(--success);}
-        .client-card.status-atrasado{border-left-color:var(--danger);}
-        .client-card.status-pendente{border-left-color:var(--warning);}
-        .client-card.status-acordo{border-left-color:var(--acordo);}
-        .client-card.status-judiciario{border-left-color:var(--judiciario);}
+        .client-card.status-pago{border-left-color:var(--success)!important;}
+        .client-card.status-atrasado{border-left-color:var(--danger)!important;}
+        .client-card.status-pendente{border-left-color:var(--warning)!important;}
+        .client-card.status-acordo{border-left-color:var(--acordo)!important;}
+        .client-card.status-judiciario{border-left-color:var(--judiciario)!important;}
         .client-header{padding:20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;background:#fff;flex-wrap:nowrap;gap:10px;}
         .client-header:hover{background:#f9fafb;}
         .header-info{display:flex;flex-direction:column;gap:4px;flex-grow:1;}
@@ -284,6 +284,29 @@
         .var-desc{color:var(--text-sec);margin-left:4px;}
         .import-status{display:none;text-align:center;padding:12px;border-radius:8px;margin-bottom:15px;font-weight:600;font-size:.9rem;line-height:1.5;}
         .pix-review-item{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:#fff;}
+        body.dark-mode .pix-review-item{background:#16213e;border-color:#2a2a4a;}
+        .pre-box{background:#f9fafb;padding:10px;border-radius:8px;margin-top:5px;border:1px solid var(--border);white-space:pre-wrap;font-family:inherit;color:var(--text-main);}
+        .pre-box-template{background:#fef2f2;padding:10px;border-radius:8px;margin-top:5px;border:1px solid #fca5a5;white-space:pre-wrap;font-family:inherit;color:#7f1d1d;}
+        body.dark-mode .pre-box{background:#1a1a2e;border-color:#2a2a4a;color:#e0e0e0;}
+        body.dark-mode .pre-box-template{background:#2a1a1a;border-color:#5b2a2a;color:#fca5a5;}
+        .pagador-info{color:#5b21b6;}
+        body.dark-mode .pagador-info{color:#c4b5fd;}
+        .chat-bubble{max-width:85%;padding:10px 14px;border-radius:14px;font-size:.9rem;line-height:1.5;white-space:pre-wrap;}
+        .chat-bubble.user{background:var(--primary);color:#fff;border-bottom-right-radius:4px;}
+        .chat-bubble.assistant{background:#f3f4f6;color:var(--text-main);border-bottom-left-radius:4px;}
+        body.dark-mode .chat-bubble.assistant{background:#232f4f;color:#e5e7eb;}
+        .action-card{border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:.88rem;line-height:1.5;}
+        .action-card.st-feita{background:#dcfce7;border:1px solid #bbf7d0;color:#166534;}
+        .action-card.st-cancelada{background:#f3f4f6;color:var(--text-sec);text-decoration:line-through;}
+        .action-card.st-decisao{background:#fef3c7;border:1px solid #fde68a;color:#92400e;}
+        .action-card.st-pendente{background:#eef2ff;border:1px solid #c7d2fe;color:#1e293b;}
+        .action-card.st-busca{background:#eef2ff;border:1px solid #c7d2fe;color:#1e293b;}
+        body.dark-mode .action-card.st-feita{background:#123524;border-color:#1f4b34;color:#86efac;}
+        body.dark-mode .action-card.st-cancelada{background:#1a1a2e;color:#9ca3af;}
+        body.dark-mode .action-card.st-decisao{background:#3a2f14;border-color:#57451c;color:#fcd34d;}
+        body.dark-mode .action-card.st-pendente{background:#1e2a4a;border-color:#334876;color:#dbeafe;}
+        body.dark-mode .action-card.st-busca{background:#1e2a4a;border-color:#334876;color:#dbeafe;}
+        body.dark-mode .var-dict-title{color:#4ade80;}
         @media(max-width:768px){
             body{padding:10px;}.top-bar{flex-direction:column;gap:10px;align-items:stretch;}.actions-box{justify-content:space-between;width:100%;}.btn-sys{flex:1;justify-content:center;}
             .installment-row{flex-direction:column;align-items:flex-start;gap:8px;padding:15px;}.home-lists-grid{grid-template-columns:1fr;}.dashboard-grid{grid-template-columns:repeat(2,1fr);}
@@ -468,6 +491,24 @@
 <button class="btn btn-primary" style="background:var(--success);" onclick="confirmPixImport()">&#9989; Confirmar baixas selecionadas</button>
 </div></div>
 
+<div class="modal-overlay" id="buscarAntigosModal"><div class="modal-content" style="max-width:650px;">
+<div class="modal-header"><div class="modal-title">&#128269; Relações Antigas</div><button class="btn-close-modal" onclick="closeModal('buscarAntigosModal')">&times;</button></div>
+<div id="buscarAntigosInfo" style="font-size:.85rem;color:var(--text-sec);margin-bottom:10px;line-height:1.5;"></div>
+<input type="text" id="buscarAntigosTermoInput" placeholder="Buscar outro nome no arquivo (opcional)..." oninput="onBuscarAntigosTermo()" style="margin-bottom:12px;">
+<div id="buscarAntigosList"></div>
+<button class="btn btn-primary" style="background:var(--success);" onclick="aplicarBuscaAntigos()" id="buscarAntigosBtnAplicar">Aplicar selecionados</button>
+</div></div>
+
+<div class="modal-overlay" id="novoDevedorArquivoModal"><div class="modal-content" style="max-width:650px;">
+<div class="modal-header"><div class="modal-title">&#128269; Pagamentos Antigos Encontrados</div><button class="btn-close-modal" onclick="pularNovoDevedorArquivo()">&times;</button></div>
+<div id="novoDevedorArquivoInfo" style="font-size:.9rem;line-height:1.5;margin-bottom:12px;"></div>
+<div id="novoDevedorArquivoList"></div>
+<div style="display:flex;gap:8px;margin-top:10px;">
+<button class="btn btn-primary" style="background:var(--success);flex:1;" onclick="confirmarNovoDevedorComArquivo()">&#9989; Criar devedor e aplicar</button>
+<button class="btn" style="background:#e5e7eb;flex:1;" onclick="pularNovoDevedorArquivo()">Criar sem vincular</button>
+</div>
+</div></div>
+
 <div class="modal-overlay" id="settingsModal"><div class="modal-content"><div class="modal-header"><div class="modal-title">&#9881;&#65039; Configurações</div><button class="btn-close-modal" onclick="closeModal('settingsModal')">&times;</button></div>
 <div class="settings-list">
 <div class="settings-item"><div><div class="settings-item-label">&#127769; Modo Escuro</div><div class="settings-item-desc">Altera o visual do aplicativo</div></div><label class="toggle-switch"><input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()"><span class="toggle-slider"></span></label></div>
@@ -618,12 +659,16 @@ for(var i=0;i<clients.length;i++){if(nomesBatemPix(nome,clients[i].name))return 
 for(var j=0;j<clients.length;j++){var pags=clients[j].pagadores||[];for(var k=0;k<pags.length;k++){if(nomesBatemPix(nome,pags[k]))return clients[j];}}
 return null;}
 
-function suggestInstallments(client,valor){
-var unpaid=client.installments.filter(function(p){return !p.paid;}).sort(function(a,b){return new Date(a.dueDate)-new Date(b.dueDate);});
+function sugerirParcelas(installments,valor){
+var unpaid=installments.filter(function(p){return !p.paid;}).sort(function(a,b){return new Date(a.dueDate)-new Date(b.dueDate);});
 for(var i=0;i<unpaid.length;i++){if(Math.abs(unpaid[i].value-valor)<0.01)return[unpaid[i]];}
 var out=[],s=0;
 for(var j=0;j<unpaid.length;j++){if(s+unpaid[j].value<=valor+0.01){out.push(unpaid[j]);s+=unpaid[j].value;}else break;}
 return out;}
+function suggestInstallments(client,valor){return sugerirParcelas(client.installments,valor);}
+function pixNomeJaConhecido(nome,c){
+if(nomesBatemPix(nome,c.name))return true;
+return (c.pagadores||[]).some(function(p){return nomesBatemPix(nome,p);});}
 
 function importRelacaoPix(input){var f=input.files[0];input.value='';if(!f)return;
 if(!userApiKey){alert('Configure sua chave de IA nas Configurações primeiro.');return;}
@@ -664,14 +709,18 @@ function renderPixReview(){
 var l=document.getElementById('pixReviewList');
 l.innerHTML=pixRows.map(function(r){
 var opts='<option value="">— Ignorar (só arquivar) —</option>'+clients.map(function(c){return'<option value="'+esc(c.firebaseId)+'"'+(c.firebaseId===r.clientId?' selected':'')+'>'+esc(c.name)+'</option>';}).join('');
+var c=r.clientId?clients.find(function(x){return x.firebaseId===r.clientId;}):null;
+var ehNovo=c&&!pixNomeJaConhecido(r.nome,c);
+var lembrarChk=ehNovo?'<label style="font-size:12px;color:var(--text-sec);display:flex;align-items:center;gap:6px;margin-top:6px;"><input type="checkbox" '+(r.lembrar!==false?'checked':'')+' onchange="pixRows['+r.idx+'].lembrar=this.checked"> 🔗 Lembrar "'+esc(r.nome)+'" como pagador de '+esc(c.name)+' (não perguntar de novo)</label>':'';
 return'<div class="pix-review-item" style="'+(r.clientId?'':'opacity:.65;')+'">'+
 '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><strong>'+esc(r.nome)+'</strong><span style="font-weight:700;color:var(--success);">'+formatMoney(r.valor)+(r.data?' <small style="color:var(--text-sec);font-weight:400;">em '+formatDate(r.data)+'</small>':'')+'</span></div>'+
 '<select style="margin-top:8px;" onchange="pixRows['+r.idx+'].clientId=this.value;renderPixReview();">'+opts+'</select>'+
 '<div style="font-size:.8rem;margin-top:6px;line-height:1.4;">'+pixRowDesc(r)+'</div>'+
+lembrarChk+
 '</div>';}).join('');}
 
 function confirmPixImport(){
-var baixas=0,arquivados=0;
+var baixas=0,arquivados=0,apelidosAprendidos=0;
 var porCliente={};
 pixRows.forEach(function(r){
 db.ref(uRef('recebimentos')).push({nome:r.nome,valor:r.valor,data:r.data||'',origem:pixOrigem,clientId:r.clientId||null,importadoEm:Date.now()});
@@ -689,10 +738,57 @@ p.paid=true;
 p.pagador=r.nome;
 p.dataPagamento=r.data||'';
 p.note=((p.note?p.note+' | ':'')+'Pix '+(r.data?formatDate(r.data):'')+' via '+pixOrigem).trim();
-baixas++;});});
+baixas++;});
+if(r.lembrar!==false&&!pixNomeJaConhecido(r.nome,c)){
+c.pagadores=c.pagadores||[];
+c.pagadores.push(r.nome);
+apelidosAprendidos++;
+}});
 updateCloud(c);});
 closeModal('pixImportModal');
-alert(baixas+' parcela(s) marcada(s) como paga(s). '+arquivados+' pagamento(s) arquivado(s) para consulta futura.');}
+alert(baixas+' parcela(s) marcada(s) como paga(s). '+arquivados+' pagamento(s) arquivado(s) para consulta futura.'+(apelidosAprendidos>0?' 🔗 '+apelidosAprendidos+' nome(s) de pagador memorizado(s) para as próximas importações.':''));}
+
+// === BUSCAR EM RELAÇÕES ANTIGAS (para devedores já cadastrados) ===
+var buscaAntigosClientId=null;var buscaAntigosTermoExtra='';var buscaAntigosMarcados={};
+function candidatosArquivo(termos){
+return recebidosArquivo.filter(function(r){return !r.clientId&&termos.some(function(t){return t&&nomesBatemPix(r.nome,t);});}).sort(function(a,b){return (a.data||'')<(b.data||'')?-1:1;});}
+function abrirBuscaAntigos(e,fid){
+e.stopPropagation();
+var c=clients.find(function(x){return x.firebaseId===fid;});if(!c)return;
+buscaAntigosClientId=fid;buscaAntigosTermoExtra='';buscaAntigosMarcados={};
+document.getElementById('buscarAntigosTermoInput').value='';
+document.getElementById('buscarAntigosInfo').innerHTML='Procurando por <b>'+esc([c.name].concat(c.pagadores||[]).join(', '))+'</b> nos pagamentos arquivados ainda não vinculados a nenhum devedor ('+recebidosArquivo.filter(function(r){return !r.clientId;}).length+' no total). Se o nome vier diferente, busque abaixo.';
+renderBuscaAntigosLista();
+document.getElementById('buscarAntigosModal').classList.add('active');}
+function onBuscarAntigosTermo(){buscaAntigosTermoExtra=document.getElementById('buscarAntigosTermoInput').value.trim();renderBuscaAntigosLista();}
+function renderBuscaAntigosLista(){
+var c=clients.find(function(x){return x.firebaseId===buscaAntigosClientId;});
+var l=document.getElementById('buscarAntigosList');
+if(!c){l.innerHTML='';return;}
+var termos=[c.name].concat(c.pagadores||[]);
+if(buscaAntigosTermoExtra)termos.push(buscaAntigosTermoExtra);
+var candidatos=candidatosArquivo(termos);
+if(candidatos.length===0){l.innerHTML='<div style="text-align:center;color:var(--text-sec);padding:20px;font-size:.9rem;">Nenhum pagamento arquivado encontrado para esse nome.</div>';return;}
+l.innerHTML=candidatos.map(function(r){
+var sug=sugerirParcelas(c.installments,r.valor);
+var desc=sug.length?('vai marcar: '+sug.map(function(p){return'Parc. '+p.number;}).join(', ')):'sem parcela em aberto compatível';
+return'<label style="display:flex;align-items:flex-start;gap:10px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;"><input type="checkbox" class="custom-checkbox" style="margin-top:3px;" '+(buscaAntigosMarcados[r.firebaseId]?'checked':'')+' onchange="buscaAntigosMarcados[\''+r.firebaseId+'\']=this.checked"><div style="flex:1;"><div style="font-size:14.5px;"><span style="font-family:monospace;font-weight:700;color:var(--success);">'+formatMoney(r.valor)+'</span><span style="color:var(--text-sec);"> em '+(r.data?formatDate(r.data):'?')+'</span></div><div style="font-size:12.5px;color:var(--text-sec);">'+esc(r.nome)+' · '+esc(r.origem)+' · '+desc+'</div></div></label>';}).join('');}
+function aplicarBuscaAntigos(){
+var c=clients.find(function(x){return x.firebaseId===buscaAntigosClientId;});if(!c)return;
+var ids=Object.keys(buscaAntigosMarcados).filter(function(k){return buscaAntigosMarcados[k];});
+if(ids.length===0){alert('Selecione ao menos um pagamento.');return;}
+var baixas=0,aprendidos=0;
+ids.forEach(function(rid){
+var r=recebidosArquivo.find(function(x){return x.firebaseId===rid;});
+if(!r)return;
+var sug=sugerirParcelas(c.installments,r.valor);
+sug.forEach(function(p){p.paid=true;p.pagador=r.nome;p.dataPagamento=r.data||'';baixas++;});
+if(!pixNomeJaConhecido(r.nome,c)){c.pagadores=c.pagadores||[];c.pagadores.push(r.nome);aprendidos++;}
+db.ref(uRef('recebimentos/'+rid)).update({clientId:c.firebaseId});
+});
+updateCloud(c);
+closeModal('buscarAntigosModal');
+alert(baixas+' parcela(s) marcada(s) como paga(s) para '+c.name+'.'+(aprendidos>0?' 🔗 '+aprendidos+' nome(s) memorizado(s).':''));}
 
 // === MODELOS DE ACORDO ===
 var acordoModels=[];
@@ -883,14 +979,66 @@ setTimeout(function(){document.body.removeChild(link);URL.revokeObjectURL(blobUr
 }catch(err){alert('Erro ao gerar PDF: '+err.message);console.error(err);}
 }
 
-function renderCobradores(){var l=document.getElementById('cobradoresList');if(cobradores.length===0){l.innerHTML='<div style="text-align:center;padding:30px;color:#666;">Nenhum cobrador.</div>';return;}l.innerHTML=cobradores.map(function(c){var cc=clients.filter(function(cl){return(cl.cobradorId||'')===c.firebaseId;}).length;var fid=esc(c.firebaseId);return'<div class="card client-card '+(c.isExpanded?'is-open':'')+'"><div class="client-header" onclick="toggleCobradorCard(\''+fid+'\')"><div class="header-info"><h2>&#127970; '+esc(c.name)+'</h2><div class="parcel-text-info"><span>'+cc+' devedor(es)</span></div></div><div class="header-actions"><button class="icon-btn" onclick="openEditCobModal(event,\''+fid+'\')">&#9998;</button><button class="icon-btn trash" onclick="deleteCobrador(event,\''+fid+'\')">&#128465;</button><span class="chevron">&#9660;</span></div></div><div class="client-body"><div style="margin-top:5px;"><strong style="font-size:.85rem;color:var(--text-sec);">DADOS PAGAMENTO:</strong><pre style="background:#f9fafb;padding:10px;border-radius:8px;margin-top:5px;border:1px solid var(--border);white-space:pre-wrap;font-family:inherit;">'+esc(c.paymentInfo||'Nenhum')+'</pre></div><div style="margin-top:10px;"><strong style="font-size:.85rem;color:var(--text-sec);">TEMPLATE COBRANÇA:</strong><pre style="background:#fef2f2;padding:10px;border-radius:8px;margin-top:5px;border:1px solid #fca5a5;white-space:pre-wrap;font-family:inherit;">'+esc(c.msgTemplate||'Padrão')+'</pre></div><div class="report-bar"><button class="btn-report" onclick="generateReport(\''+fid+'\')">&#128202; Gerar Relatório PDF</button><button class="btn-report-edit" onclick="toggleReportSettings(\''+fid+'\')" title="Personalizar relatório">&#9998;</button></div><div class="report-settings" id="reportSettings-'+fid+'"><div class="form-group"><label>Cor do Relatório</label><div class="color-options"><div class="color-opt selected" style="background:#4f46e5;" onclick="selectReportColor(\''+fid+'\',this,\'79,70,229\')" data-rgb="79,70,229"></div><div class="color-opt" style="background:#dc2626;" onclick="selectReportColor(\''+fid+'\',this,\'220,38,38\')" data-rgb="220,38,38"></div><div class="color-opt" style="background:#16a34a;" onclick="selectReportColor(\''+fid+'\',this,\'22,163,74\')" data-rgb="22,163,74"></div><div class="color-opt" style="background:#d97706;" onclick="selectReportColor(\''+fid+'\',this,\'217,119,6\')" data-rgb="217,119,6"></div><div class="color-opt" style="background:#7c3aed;" onclick="selectReportColor(\''+fid+'\',this,\'124,58,237\')" data-rgb="124,58,237"></div><div class="color-opt" style="background:#0891b2;" onclick="selectReportColor(\''+fid+'\',this,\'8,145,178\')" data-rgb="8,145,178"></div><div class="color-opt" style="background:#be185d;" onclick="selectReportColor(\''+fid+'\',this,\'190,24,93\')" data-rgb="190,24,93"></div><div class="color-opt" style="background:#1e293b;" onclick="selectReportColor(\''+fid+'\',this,\'30,41,59\')" data-rgb="30,41,59"></div></div></div><div class="form-group"><label>Título do Relatório</label><input type="text" id="reportTitle-'+fid+'" placeholder="Relatório de Cobrança" style="padding:8px;font-size:.9rem;"></div><div class="form-group"><label>Elaborado por (deixe vazio para não exibir)</label><input type="text" id="reportAuthor-'+fid+'" placeholder="Seu nome" style="padding:8px;font-size:.9rem;"></div></div></div></div>';}).join('');}
+function renderCobradores(){var l=document.getElementById('cobradoresList');if(cobradores.length===0){l.innerHTML='<div style="text-align:center;padding:30px;color:#666;">Nenhum cobrador.</div>';return;}l.innerHTML=cobradores.map(function(c){var cc=clients.filter(function(cl){return(cl.cobradorId||'')===c.firebaseId;}).length;var fid=esc(c.firebaseId);return'<div class="card client-card '+(c.isExpanded?'is-open':'')+'"><div class="client-header" onclick="toggleCobradorCard(\''+fid+'\')"><div class="header-info"><h2>&#127970; '+esc(c.name)+'</h2><div class="parcel-text-info"><span>'+cc+' devedor(es)</span></div></div><div class="header-actions"><button class="icon-btn" onclick="openEditCobModal(event,\''+fid+'\')">&#9998;</button><button class="icon-btn trash" onclick="deleteCobrador(event,\''+fid+'\')">&#128465;</button><span class="chevron">&#9660;</span></div></div><div class="client-body"><div style="margin-top:5px;"><strong style="font-size:.85rem;color:var(--text-sec);">DADOS PAGAMENTO:</strong><pre class="pre-box">'+esc(c.paymentInfo||'Nenhum')+'</pre></div><div style="margin-top:10px;"><strong style="font-size:.85rem;color:var(--text-sec);">TEMPLATE COBRANÇA:</strong><pre class="pre-box-template">'+esc(c.msgTemplate||'Padrão')+'</pre></div><div class="report-bar"><button class="btn-report" onclick="generateReport(\''+fid+'\')">&#128202; Gerar Relatório PDF</button><button class="btn-report-edit" onclick="toggleReportSettings(\''+fid+'\')" title="Personalizar relatório">&#9998;</button></div><div class="report-settings" id="reportSettings-'+fid+'"><div class="form-group"><label>Cor do Relatório</label><div class="color-options"><div class="color-opt selected" style="background:#4f46e5;" onclick="selectReportColor(\''+fid+'\',this,\'79,70,229\')" data-rgb="79,70,229"></div><div class="color-opt" style="background:#dc2626;" onclick="selectReportColor(\''+fid+'\',this,\'220,38,38\')" data-rgb="220,38,38"></div><div class="color-opt" style="background:#16a34a;" onclick="selectReportColor(\''+fid+'\',this,\'22,163,74\')" data-rgb="22,163,74"></div><div class="color-opt" style="background:#d97706;" onclick="selectReportColor(\''+fid+'\',this,\'217,119,6\')" data-rgb="217,119,6"></div><div class="color-opt" style="background:#7c3aed;" onclick="selectReportColor(\''+fid+'\',this,\'124,58,237\')" data-rgb="124,58,237"></div><div class="color-opt" style="background:#0891b2;" onclick="selectReportColor(\''+fid+'\',this,\'8,145,178\')" data-rgb="8,145,178"></div><div class="color-opt" style="background:#be185d;" onclick="selectReportColor(\''+fid+'\',this,\'190,24,93\')" data-rgb="190,24,93"></div><div class="color-opt" style="background:#1e293b;" onclick="selectReportColor(\''+fid+'\',this,\'30,41,59\')" data-rgb="30,41,59"></div></div></div><div class="form-group"><label>Título do Relatório</label><input type="text" id="reportTitle-'+fid+'" placeholder="Relatório de Cobrança" style="padding:8px;font-size:.9rem;"></div><div class="form-group"><label>Elaborado por (deixe vazio para não exibir)</label><input type="text" id="reportAuthor-'+fid+'" placeholder="Seu nome" style="padding:8px;font-size:.9rem;"></div></div></div></div>';}).join('');}
 
 // CLIENTES
 function addInstallmentGroup(){var q=parseInt(document.getElementById('tempQtd').value),v=parseFloat(document.getElementById('tempVal').value);if(!q||!v){alert("Inválido");return;}tempGroups.push({qtd:q,value:v});updatePreview();document.getElementById('tempQtd').value='';document.getElementById('tempVal').value='';}
 function updatePreview(){var l=document.getElementById('previewList'),d=document.getElementById('totalDisplay');l.innerHTML='';var tv=0,tc=0;tempGroups.forEach(function(g,i){tv+=g.qtd*g.value;tc+=g.qtd;l.innerHTML+='<li class="preview-item"><span><b>'+g.qtd+'x</b> de '+formatMoney(g.value)+'</span><span class="remove-link" onclick="removeGroup('+i+')">Remover</span></li>';});d.innerHTML='Total: '+formatMoney(tv)+' ('+tc+'x)';}
 function removeGroup(i){tempGroups.splice(i,1);updatePreview();}
 function buildInstallments(dv,gr){var arr=[];var p=dv.split('-');var sy=parseInt(p[0]),sm=parseInt(p[1])-1,sd=parseInt(p[2]);var pc=1,off=0;gr.forEach(function(g){for(var i=0;i<g.qtd;i++){var dt=new Date(sy,sm+off,sd);if(dt.getDate()!==sd)dt=new Date(sy,sm+off+1,0);arr.push({id:Date.now()+Math.random(),number:pc++,value:g.value,dueDate:dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'),paid:false,note:""});off++;}});return arr;}
-function addClient(){var n=document.getElementById('inputName').value.trim(),p=document.getElementById('inputPhone').value.trim(),pagadores=document.getElementById('inputPagadores').value.split(',').map(function(s){return s.trim();}).filter(Boolean),f=parseFloat(document.getElementById('inputFees').value)||0,fn=document.getElementById('inputFeeName').value.trim()||"Honorários",d=document.getElementById('inputDate').value,cobId=document.getElementById('inputCobradorId').value;if(!n||!d||tempGroups.length===0){alert("Preencha campos e parcelas.");return;}var finalCob=cobId;if(cobId==='MANUAL'){var mn=document.getElementById('manualCobNome').value.trim();if(!mn)return alert("Nome cobrador.");var nr=db.ref(uRef('cobradores')).push();nr.set({name:mn,paymentInfo:document.getElementById('manualCobPag').value.trim(),isExpanded:false});finalCob=nr.key;}var arr=buildInstallments(d,tempGroups);db.ref(uRef('clients')).push({id:Date.now(),name:n,phone:p,pagadores:pagadores,cobradorId:finalCob,totalDebt:arr.reduce(function(a,b){return a+b.value;},0),feeName:fn,fees:f,feesPaid:false,installments:arr,isExpanded:true});['inputName','inputPhone','inputPagadores','inputFees','inputFeeName','inputDate'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('inputCobradorId').value='';toggleManualCobrador();tempGroups=[];updatePreview();document.getElementById('newClientFormWrapper').classList.add('hidden');alert("Devedor cadastrado!");}
+var novoDevedorPendente=null;var novoDevedorMarcados={};
+function addClient(){var n=document.getElementById('inputName').value.trim(),p=document.getElementById('inputPhone').value.trim(),pagadores=document.getElementById('inputPagadores').value.split(',').map(function(s){return s.trim();}).filter(Boolean),f=parseFloat(document.getElementById('inputFees').value)||0,fn=document.getElementById('inputFeeName').value.trim()||"Honorários",d=document.getElementById('inputDate').value,cobId=document.getElementById('inputCobradorId').value;if(!n||!d||tempGroups.length===0){alert("Preencha campos e parcelas.");return;}var finalCob=cobId;if(cobId==='MANUAL'){var mn=document.getElementById('manualCobNome').value.trim();if(!mn)return alert("Nome cobrador.");var nr=db.ref(uRef('cobradores')).push();nr.set({name:mn,paymentInfo:document.getElementById('manualCobPag').value.trim(),isExpanded:false});finalCob=nr.key;}
+var arr=buildInstallments(d,tempGroups);
+var termos=[n].concat(pagadores);
+var candidatos=candidatosArquivo(termos);
+if(candidatos.length===0){finalizarNovoDevedor(n,p,pagadores,finalCob,arr,fn,f,[]);return;}
+novoDevedorPendente={n:n,p:p,pagadores:pagadores,finalCob:finalCob,arr:arr,fn:fn,f:f};
+novoDevedorMarcados={};
+document.getElementById('novoDevedorArquivoInfo').innerHTML='🔎 Encontrei '+candidatos.length+' pagamento(s) já arquivado(s) que podem ser de <b>'+esc(n)+'</b>. Desmarque os que não forem dele antes de confirmar:';
+renderNovoDevedorArquivoLista(candidatos);
+document.getElementById('novoDevedorArquivoModal').classList.add('active');}
+
+function renderNovoDevedorArquivoLista(candidatos){
+var l=document.getElementById('novoDevedorArquivoList');
+l.innerHTML=candidatos.map(function(r){
+if(novoDevedorMarcados[r.firebaseId]===undefined)novoDevedorMarcados[r.firebaseId]=true;
+var sug=sugerirParcelas(novoDevedorPendente.arr,r.valor);
+var desc=sug.length?('vai marcar: '+sug.map(function(p){return'Parc. '+p.number;}).join(', ')):'sem parcela compatível';
+return'<label style="display:flex;align-items:flex-start;gap:10px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;"><input type="checkbox" class="custom-checkbox" style="margin-top:3px;" '+(novoDevedorMarcados[r.firebaseId]?'checked':'')+' onchange="novoDevedorMarcados[\''+r.firebaseId+'\']=this.checked"><div style="flex:1;"><div style="font-size:14.5px;"><span style="font-family:monospace;font-weight:700;color:var(--success);">'+formatMoney(r.valor)+'</span><span style="color:var(--text-sec);"> em '+(r.data?formatDate(r.data):'?')+'</span></div><div style="font-size:12.5px;color:var(--text-sec);">'+esc(r.nome)+' · '+esc(r.origem)+' · '+desc+'</div></div></label>';}).join('');
+window._novoDevedorCandidatos=candidatos;}
+
+function confirmarNovoDevedorComArquivo(){
+var p2=novoDevedorPendente;if(!p2)return;
+var ids=Object.keys(novoDevedorMarcados).filter(function(k){return novoDevedorMarcados[k];});
+var aplicados=[];
+ids.forEach(function(rid){
+var r=recebidosArquivo.find(function(x){return x.firebaseId===rid;});
+if(!r)return;
+var sug=sugerirParcelas(p2.arr,r.valor);
+sug.forEach(function(inst){inst.paid=true;inst.pagador=r.nome;inst.dataPagamento=r.data||'';});
+if(sug.length>0)aplicados.push(r);});
+closeModal('novoDevedorArquivoModal');
+finalizarNovoDevedor(p2.n,p2.p,p2.pagadores,p2.finalCob,p2.arr,p2.fn,p2.f,aplicados);}
+
+function pularNovoDevedorArquivo(){
+var p2=novoDevedorPendente;if(!p2)return;
+closeModal('novoDevedorArquivoModal');
+finalizarNovoDevedor(p2.n,p2.p,p2.pagadores,p2.finalCob,p2.arr,p2.fn,p2.f,[]);}
+
+function finalizarNovoDevedor(n,p,pagadores,finalCob,arr,fn,f,aplicados){
+var pagadoresFinal=pagadores.slice();
+aplicados.forEach(function(r){if(!nomesBatemPix(n,r.nome)&&!pagadoresFinal.some(function(x){return nomesBatemPix(x,r.nome);}))pagadoresFinal.push(r.nome);});
+var nr=db.ref(uRef('clients')).push();
+nr.set({id:Date.now(),name:n,phone:p,pagadores:pagadoresFinal,cobradorId:finalCob,totalDebt:arr.reduce(function(a,b){return a+b.value;},0),feeName:fn,fees:f,feesPaid:false,installments:arr,isExpanded:true});
+var newId=nr.key;
+aplicados.forEach(function(r){db.ref(uRef('recebimentos/'+r.firebaseId)).update({clientId:newId});});
+['inputName','inputPhone','inputPagadores','inputFees','inputFeeName','inputDate'].forEach(function(id){document.getElementById(id).value='';});
+document.getElementById('inputCobradorId').value='';
+toggleManualCobrador();
+tempGroups=[];updatePreview();
+document.getElementById('newClientFormWrapper').classList.add('hidden');
+alert("Devedor cadastrado!"+(aplicados.length?' 🔎 '+aplicados.length+' pagamento(s) arquivado(s) já aplicado(s) automaticamente.':''));
+novoDevedorPendente=null;}
 function updateCloud(c){if(c.firebaseId)db.ref(uRef('clients/'+c.firebaseId)).set(c);}
 function renumberInstallments(c){c.installments.sort(function(a,b){return new Date(a.dueDate)-new Date(b.dueDate);});c.installments.forEach(function(p,i){p.number=i+1;});}
 function editFeeName(fid){var c=clients.find(function(x){return x.firebaseId===fid;});if(!c)return;var n=prompt("Nome Taxa:",c.feeName||"Honorários");if(n&&n!==c.feeName){c.feeName=n;updateCloud(c);}}
@@ -987,7 +1135,7 @@ lc.sort(function(a,b){return b.lateCount-a.lateCount;});document.getElementById(
 // CLIENTS RENDER
 function renderClients(){var l=document.getElementById('clientsList'),term=document.getElementById('searchBar').value.toLowerCase();l.innerHTML='';var fv=document.getElementById('globalFilter').value;var tc=fv!=='ALL'?clients.filter(function(c){return(c.cobradorId||'')===fv;}):clients;var fil=tc.filter(function(c){return c.name.toLowerCase().includes(term);}).sort(function(a,b){return a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'});});var ts=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0')+'-'+String(new Date().getDate()).padStart(2,'0');if(fil.length===0){l.innerHTML='<div style="text-align:center;padding:40px;color:#999">Nada.</div>';return;}
 fil.forEach(function(c){var paid=c.installments.reduce(function(a,b){return b.paid?a+b.value:a;},0),rem=c.totalDebt-paid,pct=c.totalDebt>0?(paid/c.totalDebt)*100:0;var od=c.installments.some(function(p){return!p.paid&&checkStatus(p.dueDate)==='atrasado';}),st=pct>=99.9?'pago':(od?'atrasado':'pendente');var sl=st==='pago'?'<span class="tag tag-success">Pago</span>':(st==='atrasado'?'<span class="tag tag-danger">Atrasado</span>':'<span class="tag tag-warning">Em dia</span>');var ui=c.installments.some(function(p){return!p.paid&&p.dueDate===ts;})?'<span class="urgent-icon">❗</span>':'';var fn=c.feeName||'Honorários',tp2=c.installments.length,pp=c.installments.filter(function(p){return p.paid;}).length;
-l.innerHTML+='<div id="client-card-'+esc(c.firebaseId)+'" class="card client-card status-'+st+' '+(c.isExpanded?'is-open':'')+'"><div class="client-header" onclick="toggleCard(\''+esc(c.firebaseId)+'\')"><div class="header-info"><h2>'+esc(c.name)+' '+ui+'</h2>'+((c.pagadores||[]).length>0?'<div style="font-size:12.5px;color:#5b21b6;font-weight:600;">👤 paga: '+esc(c.pagadores.join(', '))+'</div>':'')+'<div class="parcel-text-info"><span>Total: <b>'+tp2+'</b></span><span>Pagas: <b>'+pp+'</b></span><span>Pend: <b>'+(tp2-pp)+'</b></span>'+(c.fees>0&&!c.feesPaid?'<span style="color:var(--danger);font-weight:700;font-size:.78rem;">⚠ '+esc(fn)+' pendente</span>':'')+'</div></div><div class="header-actions">'+sl+'<button class="icon-btn" onclick="openEditClientModal(event,\''+esc(c.firebaseId)+'\')">✎</button><button class="icon-btn trash" onclick="deleteClient(event,\''+esc(c.firebaseId)+'\')">🗑</button><span class="chevron">▼</span></div></div><div class="client-body"><div class="progress-container"><div class="progress-labels"><span>'+pct.toFixed(0)+'%</span><span>Falta: '+formatMoney(rem)+'</span></div><div class="progress-track"><div class="progress-fill '+(pct>=99.9?'full':'')+'" style="width:'+pct+'%"></div></div></div><div class="stats-grid"><div class="stat-item"><strong>Total</strong><div>'+formatMoney(c.totalDebt)+'</div></div><div class="stat-item"><strong>Pago</strong><div style="color:var(--success)">'+formatMoney(paid)+'</div></div><div class="stat-item"><strong>Falta</strong><div>'+formatMoney(rem)+'</div></div></div>'+(function(){var today2=new Date();today2.setHours(0,0,0,0);var vencidas=c.installments.filter(function(p){if(p.paid)return false;var pp=p.dueDate.split('-');return new Date(pp[0],pp[1]-1,pp[2])<=today2;}).length;return vencidas>0?'<button style="width:100%;padding:12px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:8px;font-weight:600;cursor:pointer;font-size:.85rem;margin-bottom:15px;" onclick="sendGroupedBilling(event,\''+esc(c.firebaseId)+'\')">📱 Cobrar todas as vencidas ('+vencidas+')</button>':'';})()+'<div style="background:#eff6ff;padding:12px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:600;color:#1e3a8a;">'+esc(fn)+': '+formatMoney(c.fees)+' <button class="action-btn" style="font-size:.8rem" onclick="editFeeName(\''+esc(c.firebaseId)+'\')">✎</button></span><label style="cursor:pointer;display:flex;align-items:center;"><input type="checkbox" class="custom-checkbox" '+(c.feesPaid?'checked':'')+' onchange="toggleFee(\''+esc(c.firebaseId)+'\')"><span style="margin-left:8px;color:#1e3a8a;">'+(c.feesPaid?'Recebido':'Pendente')+'</span></label></div><div class="installment-list">'+c.installments.map(function(p){var ist=checkStatus(p.dueDate),tag=p.paid?'<span class="tag tag-success">OK</span>':(ist==='atrasado'?'<span class="tag tag-danger">Vencido</span>':'<span class="tag tag-warning">Aberto</span>');return'<div class="installment-row" style="'+(p.paid?'opacity:.6':'')+'"><div class="chk-group"><input type="checkbox" class="custom-checkbox" '+(p.paid?'checked':'')+' onchange="toggleInstallment(\''+esc(c.firebaseId)+'\','+p.id+')"><div><div style="font-weight:600;">Parc. '+p.number+'</div><div class="inst-date">'+formatDate(p.dueDate)+'</div>'+(p.pagador?'<div style="font-size:11.5px;color:#5b21b6;">👤 pago por '+esc(p.pagador)+'</div>':'')+(p.diferenca?'<div style="font-size:11.5px;color:'+(p.diferenca>0?'var(--adiant,#1D4ED8)':'var(--warning)')+';">'+(p.diferenca>0?'pagou a mais: '+formatMoney(p.diferenca):'pagou a menos: '+formatMoney(-p.diferenca))+'</div>':'')+'</div></div><div style="display:flex;align-items:center;">'+(!p.paid?'<button class="btn-whatsapp '+(c.phone?'':'disabled')+'" onclick="handleZapClick(\''+esc(c.phone)+'\',\''+esc(c.name)+'\','+p.number+','+p.value+',\''+p.dueDate+'\',\'auto\',\''+esc(c.firebaseId)+'\','+p.id+','+(p.contacted?'true':'false')+')">'+(p.contacted?'✅':'📱')+'</button>':'')+'<div style="text-align:right;margin-left:10px;"><div class="val-group"><span class="inst-val">'+formatMoney(p.value)+'</span><button class="action-btn" onclick="editInstallmentDate(\''+esc(c.firebaseId)+'\','+p.id+')">📅</button><button class="action-btn" title="Quem pagou" onclick="editPagador(\''+esc(c.firebaseId)+'\','+p.id+')">👤</button><button class="action-btn btn-note '+(p.note?'has-note':'')+'" onclick="editNote(\''+esc(c.firebaseId)+'\','+p.id+')">📝</button><button class="action-btn" onclick="editInstallmentValue(\''+esc(c.firebaseId)+'\','+p.id+')">✎</button><button class="action-btn" onclick="deleteInstallment(\''+esc(c.firebaseId)+'\','+p.id+')">✕</button></div><div>'+tag+'</div></div></div></div>';}).join('')+'<button class="btn-add-more" onclick="addMoreParcels(\''+esc(c.firebaseId)+'\')">+ Parcelas</button></div><button style="width:100%;padding:10px;background:#fee2e2;color:#991b1b;border:none;border-radius:0 0 8px 8px;font-weight:600;cursor:pointer;font-size:.85rem;margin-top:1px;" onclick="clientToJudiciario(event,\''+esc(c.firebaseId)+'\')">⚖️ Enviar para Judiciário</button></div></div>';});}
+l.innerHTML+='<div id="client-card-'+esc(c.firebaseId)+'" class="card client-card status-'+st+' '+(c.isExpanded?'is-open':'')+'"><div class="client-header" onclick="toggleCard(\''+esc(c.firebaseId)+'\')"><div class="header-info"><h2>'+esc(c.name)+' '+ui+'</h2>'+((c.pagadores||[]).length>0?'<div class="pagador-info" style="font-size:12.5px;font-weight:600;">👤 paga: '+esc(c.pagadores.join(', '))+'</div>':'')+'<div class="parcel-text-info"><span>Total: <b>'+tp2+'</b></span><span>Pagas: <b>'+pp+'</b></span><span>Pend: <b>'+(tp2-pp)+'</b></span>'+(c.fees>0&&!c.feesPaid?'<span style="color:var(--danger);font-weight:700;font-size:.78rem;">⚠ '+esc(fn)+' pendente</span>':'')+'</div></div><div class="header-actions">'+sl+'<button class="icon-btn" onclick="openEditClientModal(event,\''+esc(c.firebaseId)+'\')">✎</button><button class="icon-btn" title="Buscar em relações antigas" onclick="abrirBuscaAntigos(event,\''+esc(c.firebaseId)+'\')">🔎</button><button class="icon-btn trash" onclick="deleteClient(event,\''+esc(c.firebaseId)+'\')">🗑</button><span class="chevron">▼</span></div></div><div class="client-body"><div class="progress-container"><div class="progress-labels"><span>'+pct.toFixed(0)+'%</span><span>Falta: '+formatMoney(rem)+'</span></div><div class="progress-track"><div class="progress-fill '+(pct>=99.9?'full':'')+'" style="width:'+pct+'%"></div></div></div><div class="stats-grid"><div class="stat-item"><strong>Total</strong><div>'+formatMoney(c.totalDebt)+'</div></div><div class="stat-item"><strong>Pago</strong><div style="color:var(--success)">'+formatMoney(paid)+'</div></div><div class="stat-item"><strong>Falta</strong><div>'+formatMoney(rem)+'</div></div></div>'+(function(){var today2=new Date();today2.setHours(0,0,0,0);var vencidas=c.installments.filter(function(p){if(p.paid)return false;var pp=p.dueDate.split('-');return new Date(pp[0],pp[1]-1,pp[2])<=today2;}).length;return vencidas>0?'<button style="width:100%;padding:12px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:8px;font-weight:600;cursor:pointer;font-size:.85rem;margin-bottom:15px;" onclick="sendGroupedBilling(event,\''+esc(c.firebaseId)+'\')">📱 Cobrar todas as vencidas ('+vencidas+')</button>':'';})()+'<div style="background:#eff6ff;padding:12px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:600;color:#1e3a8a;">'+esc(fn)+': '+formatMoney(c.fees)+' <button class="action-btn" style="font-size:.8rem" onclick="editFeeName(\''+esc(c.firebaseId)+'\')">✎</button></span><label style="cursor:pointer;display:flex;align-items:center;"><input type="checkbox" class="custom-checkbox" '+(c.feesPaid?'checked':'')+' onchange="toggleFee(\''+esc(c.firebaseId)+'\')"><span style="margin-left:8px;color:#1e3a8a;">'+(c.feesPaid?'Recebido':'Pendente')+'</span></label></div><div class="installment-list">'+c.installments.map(function(p){var ist=checkStatus(p.dueDate),tag=p.paid?'<span class="tag tag-success">OK</span>':(ist==='atrasado'?'<span class="tag tag-danger">Vencido</span>':'<span class="tag tag-warning">Aberto</span>');return'<div class="installment-row" style="'+(p.paid?'opacity:.6':'')+'"><div class="chk-group"><input type="checkbox" class="custom-checkbox" '+(p.paid?'checked':'')+' onchange="toggleInstallment(\''+esc(c.firebaseId)+'\','+p.id+')"><div><div style="font-weight:600;">Parc. '+p.number+'</div><div class="inst-date">'+formatDate(p.dueDate)+'</div>'+(p.pagador?'<div class="pagador-info" style="font-size:11.5px;">👤 pago por '+esc(p.pagador)+'</div>':'')+(p.diferenca?'<div style="font-size:11.5px;color:'+(p.diferenca>0?'var(--adiant,#1D4ED8)':'var(--warning)')+';">'+(p.diferenca>0?'pagou a mais: '+formatMoney(p.diferenca):'pagou a menos: '+formatMoney(-p.diferenca))+'</div>':'')+'</div></div><div style="display:flex;align-items:center;">'+(!p.paid?'<button class="btn-whatsapp '+(c.phone?'':'disabled')+'" onclick="handleZapClick(\''+esc(c.phone)+'\',\''+esc(c.name)+'\','+p.number+','+p.value+',\''+p.dueDate+'\',\'auto\',\''+esc(c.firebaseId)+'\','+p.id+','+(p.contacted?'true':'false')+')">'+(p.contacted?'✅':'📱')+'</button>':'')+'<div style="text-align:right;margin-left:10px;"><div class="val-group"><span class="inst-val">'+formatMoney(p.value)+'</span><button class="action-btn" onclick="editInstallmentDate(\''+esc(c.firebaseId)+'\','+p.id+')">📅</button><button class="action-btn" title="Quem pagou" onclick="editPagador(\''+esc(c.firebaseId)+'\','+p.id+')">👤</button><button class="action-btn btn-note '+(p.note?'has-note':'')+'" onclick="editNote(\''+esc(c.firebaseId)+'\','+p.id+')">📝</button><button class="action-btn" onclick="editInstallmentValue(\''+esc(c.firebaseId)+'\','+p.id+')">✎</button><button class="action-btn" onclick="deleteInstallment(\''+esc(c.firebaseId)+'\','+p.id+')">✕</button></div><div>'+tag+'</div></div></div></div>';}).join('')+'<button class="btn-add-more" onclick="addMoreParcels(\''+esc(c.firebaseId)+'\')">+ Parcelas</button></div><button style="width:100%;padding:10px;background:#fee2e2;color:#991b1b;border:none;border-radius:0 0 8px 8px;font-weight:600;cursor:pointer;font-size:.85rem;margin-top:1px;" onclick="clientToJudiciario(event,\''+esc(c.firebaseId)+'\')">⚖️ Enviar para Judiciário</button></div></div>';});}
 
 // AGENDA
 function exportToCalendar(){
@@ -1095,7 +1243,11 @@ nome_devedor:{type:'string'},numero_parcela:{type:'integer'},novo_valor:{type:'n
 },required:['nome_devedor','numero_parcela','novo_valor']}},
 {name:'adicionar_pagador_autorizado',description:'Cadastra que uma pessoa diferente do devedor está autorizada a pagar as parcelas dele.',input_schema:{type:'object',properties:{
 nome_devedor:{type:'string'},nomes_pagadores:{type:'array',items:{type:'string'}}
-},required:['nome_devedor','nomes_pagadores']}}
+},required:['nome_devedor','nomes_pagadores']}},
+{name:'buscar_pagamentos_arquivados',description:'Procura nas relações de Pix já importadas anteriormente (arquivo) por pagamentos que ainda não foram vinculados a nenhum devedor, usando o nome do devedor e, opcionalmente, um nome antigo/alternativo do pagador informado pelo usuário. Não grava nada sozinha — apenas mostra os resultados para o usuário aplicar um por um. Use quando o usuário pedir para verificar se alguém já pagou antes, ou ao cadastrar um devedor novo e o usuário mencionar que havia relatórios PDF antigos com esse nome ou outro nome.',input_schema:{type:'object',properties:{
+nome_devedor:{type:'string',description:'Nome do devedor já cadastrado no app.'},
+termo_alternativo:{type:'string',description:'Nome antigo, apelido ou de quem pagava antes, se diferente do nome atual do devedor. Opcional.'}
+},required:['nome_devedor']}}
 ];
 
 function findClientByNameFuzzy(nome){
@@ -1105,11 +1257,12 @@ return null;}
 
 function renderChat(){
 var box=document.getElementById('chatMessages');
-if(chatHistory.length===0){box.innerHTML='<div style="text-align:center;color:var(--text-sec);padding:20px;font-size:.9rem;line-height:1.6;">🤖 Pergunte sobre seus dados ou peça para dar baixa em pagamentos.<br>Ex.: "Quantas parcelas o Fulano já pagou?", "Marca a parcela 3 do João como paga", "A Maria pagou 1200 hoje pela parcela do João".<br><br><b>Nenhuma alteração é feita sem você confirmar.</b></div>';return;}
+if(chatHistory.length===0){box.innerHTML='<div style="text-align:center;color:var(--text-sec);padding:20px;font-size:.9rem;line-height:1.6;">🤖 Pergunte sobre seus dados ou peça para dar baixa em pagamentos.<br>Ex.: "Quantas parcelas o Fulano já pagou?", "Marca a parcela 3 do João como paga", "A Maria pagou 1200 hoje pela parcela do João", "Verifica se o Carlos já pagou algo nas relações antigas".<br><br><b>Nenhuma alteração é feita sem você confirmar.</b></div>';return;}
 box.innerHTML=chatHistory.map(function(m){
 if(m.type==='action')return renderActionCard(m);
+if(m.type==='busca')return renderBuscaCard(m);
 var isUser=m.role==='user';
-return'<div style="display:flex;justify-content:'+(isUser?'flex-end':'flex-start')+';margin-bottom:10px;"><div style="max-width:85%;padding:10px 14px;border-radius:14px;font-size:.9rem;line-height:1.5;white-space:pre-wrap;'+(isUser?'background:var(--primary);color:#fff;border-bottom-right-radius:4px;':'background:#f3f4f6;color:var(--text-main);border-bottom-left-radius:4px;')+'">'+esc(m.content)+'</div></div>';}).join('');
+return'<div style="display:flex;justify-content:'+(isUser?'flex-end':'flex-start')+';margin-bottom:10px;"><div class="chat-bubble '+(isUser?'user':'assistant')+'">'+esc(m.content)+'</div></div>';}).join('');
 box.scrollTop=box.scrollHeight;}
 
 function descreverAcao(tool,input){
@@ -1119,11 +1272,16 @@ if(tool==='editar_valor_parcela')return'Alterar o valor da parcela '+input.numer
 if(tool==='adicionar_pagador_autorizado')return'Cadastrar '+esc((input.nomes_pagadores||[]).join(', '))+' como pagador(es) autorizado(s) de <b>'+esc(input.nome_devedor)+'</b>.';
 return'Ação desconhecida.';}
 
+function renderBuscaCard(m){
+var linhas=m.resultados.map(function(r,i){
+return'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(128,128,128,.25);font-size:.85rem;"><div><span style="font-family:monospace;font-weight:700;color:var(--success);">'+formatMoney(r.valor)+'</span> em '+(r.data?formatDate(r.data):'?')+' <span style="opacity:.75;">— '+esc(r.nome)+' · '+esc(r.origem)+'</span></div>'+(r.aplicado?'<span style="color:var(--success);font-weight:700;">✅</span>':'<button class="btn-ai btn-ai-sm" onclick="aplicarPagamentoArquivado(\''+m.id+'\','+i+')">Aplicar</button>')+'</div>';}).join('');
+return'<div class="action-card st-busca">🔎 Encontrei '+m.resultados.length+' pagamento(s) arquivado(s) ainda não vinculado(s) que combinam com <b>'+esc(m.nomeDevedor)+'</b>:'+linhas+'</div>';}
+
 function renderActionCard(m){
-if(m.status==='feita')return'<div style="background:#dcfce7;border:1px solid #bbf7d0;color:#166534;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:.88rem;">✅ '+m.resumo+'</div>';
-if(m.status==='cancelada')return'<div style="background:#f3f4f6;color:var(--text-sec);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:.88rem;text-decoration:line-through;">'+m.resumo+'</div>';
-if(m.status==='decisao')return'<div style="background:#fef3c7;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:.88rem;line-height:1.5;">'+m.resumo+'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;"><button class="btn-ai btn-ai-sm" onclick="resolverDecisaoPagamento(\''+m.id+'\',\'proxima\')">⏭ Abater na próxima parcela</button><button class="btn-ai btn-ai-sm" onclick="resolverDecisaoPagamento(\''+m.id+'\',\'ultima\')">⏹ Abater na última parcela</button><button class="btn-sys" style="height:auto;padding:6px 10px;" onclick="resolverDecisaoPagamento(\''+m.id+'\',\'so_registrar\')">📝 Só registrar a diferença</button><button class="btn-sys" style="height:auto;padding:6px 10px;color:var(--danger);" onclick="cancelarAcao(\''+m.id+'\')">Cancelar</button></div></div>';
-return'<div style="background:#eef2ff;border:1px solid #c7d2fe;color:#1e293b;border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:.88rem;line-height:1.5;">🤖 A IA quer: '+m.resumo+'<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn-ai btn-ai-sm" onclick="executarAcaoConfirmada(\''+m.id+'\')">✅ Confirmar</button><button class="btn-sys" style="height:auto;padding:6px 10px;color:var(--danger);" onclick="cancelarAcao(\''+m.id+'\')">Cancelar</button></div></div>';}
+if(m.status==='feita')return'<div class="action-card st-feita">✅ '+m.resumo+'</div>';
+if(m.status==='cancelada')return'<div class="action-card st-cancelada">'+m.resumo+'</div>';
+if(m.status==='decisao')return'<div class="action-card st-decisao">'+m.resumo+'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;"><button class="btn-ai btn-ai-sm" onclick="resolverDecisaoPagamento(\''+m.id+'\',\'proxima\')">⏭ Abater na próxima parcela</button><button class="btn-ai btn-ai-sm" onclick="resolverDecisaoPagamento(\''+m.id+'\',\'ultima\')">⏹ Abater na última parcela</button><button class="btn-sys" style="height:auto;padding:6px 10px;" onclick="resolverDecisaoPagamento(\''+m.id+'\',\'so_registrar\')">📝 Só registrar a diferença</button><button class="btn-sys" style="height:auto;padding:6px 10px;color:var(--danger);" onclick="cancelarAcao(\''+m.id+'\')">Cancelar</button></div></div>';
+return'<div class="action-card st-pendente">🤖 A IA quer: '+m.resumo+'<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn-ai btn-ai-sm" onclick="executarAcaoConfirmada(\''+m.id+'\')">✅ Confirmar</button><button class="btn-sys" style="height:auto;padding:6px 10px;color:var(--danger);" onclick="cancelarAcao(\''+m.id+'\')">Cancelar</button></div></div>';}
 
 function chatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviarPerguntaAssistente();}}
 
@@ -1157,9 +1315,33 @@ var typing=document.getElementById('chatTyping');if(typing)typing.remove();
 chatHistory.push({role:'assistant',content:'❌ Erro de conexão: '+e.message});
 renderChat();});}
 
+function aplicarPagamentoArquivado(msgId,idx){
+var msg=chatHistory.find(function(m){return m.id===msgId;});
+if(!msg||!msg.resultados)return;
+var r=msg.resultados[idx];
+if(!r||r.aplicado)return;
+var c=clients.find(function(x){return x.firebaseId===msg.clientId;});
+if(!c)return;
+var sug=sugerirParcelas(c.installments,r.valor);
+sug.forEach(function(p){p.paid=true;p.pagador=r.nome;p.dataPagamento=r.data||'';});
+if(!pixNomeJaConhecido(r.nome,c)){c.pagadores=c.pagadores||[];c.pagadores.push(r.nome);}
+updateCloud(c);
+db.ref(uRef('recebimentos/'+r.recebId)).update({clientId:c.firebaseId});
+r.aplicado=true;
+renderChat();}
+
 function criarCartaoDeAcao(tool,input){
 actionIdSeq++;
 var id='act'+actionIdSeq+'_'+Date.now();
+if(tool==='buscar_pagamentos_arquivados'){
+var cb=findClientByNameFuzzy(input.nome_devedor);
+if(!cb){chatHistory.push({role:'assistant',content:'❌ Não encontrei um devedor chamado "'+input.nome_devedor+'". Devedores cadastrados: '+clients.map(function(x){return x.name;}).join(', ')});return;}
+var termosBusca=[cb.name].concat(cb.pagadores||[]);
+if(input.termo_alternativo)termosBusca.push(input.termo_alternativo);
+var candidatos=candidatosArquivo(termosBusca);
+if(candidatos.length===0){chatHistory.push({role:'assistant',content:'Não encontrei pagamentos arquivados sem vínculo para "'+input.nome_devedor+'"'+(input.termo_alternativo?' nem para "'+input.termo_alternativo+'"':'')+'.'});return;}
+chatHistory.push({type:'busca',id:id,clientId:cb.firebaseId,nomeDevedor:cb.name,resultados:candidatos.map(function(r){return{recebId:r.firebaseId,nome:r.nome,valor:r.valor,data:r.data,origem:r.origem,aplicado:false};})});
+return;}
 if(tool==='registrar_pagamento'){
 var c=findClientByNameFuzzy(input.nome_devedor);
 if(!c){chatHistory.push({role:'assistant',content:'❌ Não encontrei um devedor chamado "'+input.nome_devedor+'". Devedores cadastrados: '+clients.map(function(x){return x.name;}).join(', ')});return;}
